@@ -19,8 +19,10 @@ public class CSVParser {
                     float time = Float.parseFloat(columns[4]);
                     dataPoints.add(new DataPoint(voltage, temperature, rpm, current, time));
                 } catch (NumberFormatException e) {
-                    throw new RuntimeException(e);
+                    System.err.println("Error parsing row: " + row + " - " + e.getMessage());
                 }
+            } else {
+                System.err.println("Invalid row format: " + row);
             }
         }
         return dataPoints;

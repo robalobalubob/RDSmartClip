@@ -8,23 +8,39 @@ across the layout configurations
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary" />
+
+    </com.google.android.material.appbar.AppBarLayout>
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/voltage_chart"
         android:layout_width="match_parent"
-        android:layout_height="200dp" />
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/temperature_chart"
         android:layout_width="match_parent"
-        android:layout_height="200dp" />
+        android:layout_height="0dp"
+        android:layout_weight="1"  />
 
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/rpm_chart"
         android:layout_width="match_parent"
-        android:layout_height="200dp" />
+        android:layout_height="0dp"
+        android:layout_weight="1"  />
 
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/current_chart"
         android:layout_width="match_parent"
-        android:layout_height="200dp" />
+        android:layout_height="0dp"
+        android:layout_weight="1"  />
 </LinearLayout>
