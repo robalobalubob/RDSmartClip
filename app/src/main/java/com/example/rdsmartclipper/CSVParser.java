@@ -3,6 +3,8 @@ package com.example.rdsmartclipper;
 import java.util.ArrayList;
 import java.util.List;
 
+//voltage, current, RPM, temp, roll, pitch, yaw, acceleration, time
+
 public class CSVParser {
     public List<DataPoint> parseCSV(String data) {
         List<DataPoint> dataPoints = new ArrayList<>();

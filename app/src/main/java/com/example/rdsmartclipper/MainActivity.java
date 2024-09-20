@@ -7,22 +7,12 @@ import android.view.MenuItem;
 import android.view.Menu;
 import android.content.Intent;
 
-import com.google.android.material.navigation.NavigationView;
-
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.preference.PreferenceManager;
 
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
-import android.os.Handler;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -37,25 +27,19 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
 
 import com.example.rdsmartclipper.databinding.ActivityMainBinding;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements BluetoothManager.OnDataReceivedListener, BluetoothManager.PermissionRequestCallback {
 
-    private AppBarConfiguration mAppBarConfiguration;
-    private BluetoothAdapter bluetoothAdapter;
-    private BluetoothSocket bluetoothSocket;
-    private InputStream inputStream;
-    private Handler handler = new Handler();
 
-    private final UUID MY_UUID = UUID.fromString("00000000-0000-1000-8000-00805F9B34FB");
+    private BluetoothManager bluetoothManager;
+
     private LineChart voltageChart, temperatureChart, rpmChart, currentChart;
-    private List<Entry> voltageEntries = new ArrayList<>();
-    private List<Entry> temperatureEntries = new ArrayList<>();
-    private List<Entry> rpmEntries = new ArrayList<>();
-    private List<Entry> currentEntries = new ArrayList<>();
+    private final List<Entry> voltageEntries = new ArrayList<>();
+    private final List<Entry> temperatureEntries = new ArrayList<>();
+    private final List<Entry> rpmEntries = new ArrayList<>();
+    private final List<Entry> currentEntries = new ArrayList<>();
 
     private boolean isDebugMode = false;
 
@@ -69,26 +53,13 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPrefs.registerOnSharedPreferenceChangeListener(prefListener);
 
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (bluetoothAdapter == null) {
-            Toast.makeText(this, "Bluetooth not supported", Toast.LENGTH_SHORT).show();
-            finish();
-        }
-
-        if (!bluetoothAdapter.isEnabled()) {
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-            }
-            bluetoothAdapter.enable();
-        }
         isDebugMode = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("debug_mode", false);
+
+        bluetoothManager = new BluetoothManager(this);
+
+        bluetoothManager.setOnDataReceivedListener(this);
+        bluetoothManager.setPermissionRequestCallback(requestCode -> ActivityCompat.requestPermissions(MainActivity.this,
+                new String[]{android.Manifest.permission.BLUETOOTH_CONNECT}, requestCode));
 
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -102,20 +73,18 @@ public class MainActivity extends AppCompatActivity {
         rpmChart = findViewById(R.id.rpm_chart);
         currentChart = findViewById(R.id.current_chart);
         if (!isDebugMode) {
-            connectToDevice();
+            bluetoothManager.showDeviceListAndConnect(macAddress -> bluetoothManager.connectToDevice(macAddress));
         } else {
             readDataFromFile();
         }
 
     }
 
-    private SharedPreferences.OnSharedPreferenceChangeListener prefListener =
-            new SharedPreferences.OnSharedPreferenceChangeListener() {
-                public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                    assert key != null;
-                    if (key.equals("debug_mode")) {
-                        updateChartsBasedOnDebugMode();
-                    }
+    private final SharedPreferences.OnSharedPreferenceChangeListener prefListener =
+            (sharedPreferences, key) -> {
+                assert key != null;
+                if (key.equals("debug_mode")) {
+                    updateChartsBasedOnDebugMode();
                 }
             };
 
@@ -123,56 +92,6 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.toolbar_menu, menu);
         return true;
-    }
-    private void connectToDevice() {
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
-        for (BluetoothDevice device : pairedDevices) {
-            if (device.getName().equals("Name")) {
-                try {
-                    bluetoothSocket = device.createRfcommSocketToServiceRecord(MY_UUID);
-                    bluetoothSocket.connect();
-                    inputStream = bluetoothSocket.getInputStream();
-                    listenForData();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-                break;
-            }
-        }
-    }
-
-    private void listenForData() {
-        if(isDebugMode) return;
-        final byte[] buffer = new byte[1024];
-        final int[] bytes = new int[1];
-
-        Thread thread = new Thread(() -> {
-            while(true) {
-                try {
-                    bytes[0] = inputStream.read(buffer);
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            String data = new String(buffer, 0, bytes[0]);
-                            parseCSVData(data);
-                        }
-                    });
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
-        thread.start();
     }
 
     private void readDataFromFile() {
@@ -213,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
         if (isDebugMode) {
             readDataFromFile();
         } else {
-            connectToDevice();
+            bluetoothManager.showDeviceListAndConnect(macAddress -> bluetoothManager.connectToDevice(macAddress));
             // Make sure to clear existing data and stop any ongoing Bluetooth data reading
         }
 
@@ -248,10 +167,27 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
     @Override
-    public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        return NavigationUI.navigateUp(navController, mAppBarConfiguration)
-                || super.onSupportNavigateUp();
+    public void onDataReceived(String data) {
+        runOnUiThread(() -> parseCSVData(data));
+    }
+
+    @Override
+    public void requestBluetoothConnectPermission(int requestCode) {
+        ActivityCompat.requestPermissions(this,
+                new String[]{android.Manifest.permission.BLUETOOTH_CONNECT}, requestCode);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                bluetoothManager.showDeviceListAndConnect(macAddress -> bluetoothManager.connectToDevice(macAddress));
+            } else {
+                Toast.makeText(this, "Bluetooth connect permission denied", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }
