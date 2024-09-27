@@ -4,4 +4,10 @@
         android:key="debug_mode"
         android:title="Debug Mode"
         android:defaultValue="false" />
+
+    <SwitchPreferenceCompat
+        android:key="fullscreen_mode"
+        android:title="Fullscreen Mode"
+        android:defaultValue="true"
+        android:summary="Enable or disable fullscreen mode for charts" />
 </PreferenceScreen>

@@ -13,7 +13,6 @@ import android.util.Log;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 
-import java.security.Permission;
 import java.util.ArrayList;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,11 +23,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BluetoothManager {
 
-    private BluetoothAdapter bluetoothAdapter;
+    private final BluetoothAdapter bluetoothAdapter;
     private BluetoothSocket bluetoothSocket;
-    private Handler handler = new Handler();
+    private final Handler handler = new Handler();
     private InputStream inputStream;
-    private Context context;
+    private final Context context;
     private OnDataReceivedListener onDataReceivedListener;
 
     private final UUID MY_UUID = UUID.fromString("00000000-0000-1000-8000-00805F9B34FB");
@@ -46,6 +45,9 @@ public class BluetoothManager {
     public void connectToDevice(String macAddress) {
         if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_CONNECT)
                 != PackageManager.PERMISSION_GRANTED) {
+            if (permissionRequestCallback != null) {
+                permissionRequestCallback.requestBluetoothConnectPermission(1);
+            }
             return;
         }
         if(macAddress == null ||macAddress.isEmpty()){
@@ -74,13 +76,10 @@ public class BluetoothManager {
             while (isRunning.get()) {
                 try {
                     bytes[0] = inputStream.read(buffer);
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            String data = new String(buffer, 0, bytes[0]);
-                            if (onDataReceivedListener != null) {
-                                onDataReceivedListener.onDataReceived(data);
-                            }
+                    handler.post(() -> {
+                        String data = new String(buffer, 0, bytes[0]);
+                        if (onDataReceivedListener != null) {
+                            onDataReceivedListener.onDataReceived(data);
                         }
                     });
                 } catch (IOException e) {

@@ -1,50 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_coordinator_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+    <!-- AppBar with Toolbar -->
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout"
+        android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary" />
-
+            android:background="?attr/colorPrimary"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
     </com.google.android.material.appbar.AppBarLayout>
-    <!-- Navigation Buttons -->
-    <Button
-        android:id="@+id/button_voltage_chart"
+    <LinearLayout
+        android:id="@+id/main_content"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/voltage_chart" />
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize">
+        <!-- Navigation Buttons -->
+        <Button
+            android:id="@+id/button_voltage_chart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/voltage_chart" />
 
-    <Button
-        android:id="@+id/button_temperature_chart"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/temperature_chart" />
+        <Button
+            android:id="@+id/button_temperature_chart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/temperature_chart" />
 
-    <Button
-        android:id="@+id/button_rpm_chart"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/rpm_chart" />
+        <Button
+            android:id="@+id/button_rpm_chart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/rpm_chart" />
 
-    <Button
-        android:id="@+id/button_current_chart"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/current_chart" />
+        <Button
+            android:id="@+id/button_current_chart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/current_chart" />
+        <TextView
+            android:id="@+id/text_voltage_current"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Voltage: N/A   Current: N/A"
+            android:textSize="16sp"
+            android:padding="8dp"
+            android:textAlignment="center" />
 
-    <!-- Fragment Container -->
+        <TextView
+            android:id="@+id/text_temperature_rpm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Temperature: N/A   RPM: N/A"
+            android:textSize="16sp"
+            android:padding="8dp"
+            android:textAlignment="center" />
+
+        <!-- Fragment Container -->
+        <FrameLayout
+            android:id="@+id/fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+    </LinearLayout>
+
     <FrameLayout
-        android:id="@+id/fragment_container"
+        android:id="@+id/fullscreen_fragment_container"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-</LinearLayout>
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

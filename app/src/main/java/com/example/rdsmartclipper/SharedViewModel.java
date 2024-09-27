@@ -30,6 +30,19 @@ public class SharedViewModel extends ViewModel {
         }
     }
 
+    public void addVoltageEntry(Entry entry) {
+        List<Entry> currentList = voltageEntries.getValue();
+        if (currentList == null) {
+            currentList = new ArrayList<>();
+        }
+        currentList.add(entry);
+        // Remove old entries if size exceeds MAX_ENTRIES
+        if (currentList.size() > MAX_ENTRIES) {
+            currentList = currentList.subList(currentList.size() - MAX_ENTRIES, currentList.size());
+        }
+        voltageEntries.setValue(currentList);
+    }
+
 
     public LiveData<List<Entry>> getVoltageEntries() {
         return voltageEntries;
@@ -44,6 +57,19 @@ public class SharedViewModel extends ViewModel {
             }
             temperatureEntries.setValue(currentList);
         }
+    }
+
+    public void addTemperatureEntry(Entry entry) {
+        List<Entry> currentList = temperatureEntries.getValue();
+        if (currentList == null) {
+            currentList = new ArrayList<>();
+        }
+        currentList.add(entry);
+        // Remove old entries if size exceeds MAX_ENTRIES
+        if (currentList.size() > MAX_ENTRIES) {
+            currentList = currentList.subList(currentList.size() - MAX_ENTRIES, currentList.size());
+        }
+        temperatureEntries.setValue(currentList);
     }
 
     public LiveData<List<Entry>> getTemperatureEntries() {
@@ -61,6 +87,19 @@ public class SharedViewModel extends ViewModel {
         }
     }
 
+    public void addRPMEntry(Entry entry) {
+        List<Entry> currentList = rpmEntries.getValue();
+        if (currentList == null) {
+            currentList = new ArrayList<>();
+        }
+        currentList.add(entry);
+        // Remove old entries if size exceeds MAX_ENTRIES
+        if (currentList.size() > MAX_ENTRIES) {
+            currentList = currentList.subList(currentList.size() - MAX_ENTRIES, currentList.size());
+        }
+        rpmEntries.setValue(currentList);
+    }
+
     public LiveData<List<Entry>> getRPMEntries() {
         return rpmEntries;
     }
@@ -74,6 +113,19 @@ public class SharedViewModel extends ViewModel {
             }
             currentEntries.setValue(currentList);
         }
+    }
+
+    public void addCurrentEntry(Entry entry) {
+        List<Entry> currentList = currentEntries.getValue();
+        if (currentList == null) {
+            currentList = new ArrayList<>();
+        }
+        currentList.add(entry);
+        // Remove old entries if size exceeds MAX_ENTRIES
+        if (currentList.size() > MAX_ENTRIES) {
+            currentList = currentList.subList(currentList.size() - MAX_ENTRIES, currentList.size());
+        }
+        currentEntries.setValue(currentList);
     }
 
     public LiveData<List<Entry>> getCurrentEntries() {
