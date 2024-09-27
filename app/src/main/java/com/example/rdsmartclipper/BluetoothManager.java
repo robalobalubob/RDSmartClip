@@ -19,6 +19,8 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BluetoothManager {
@@ -30,7 +32,7 @@ public class BluetoothManager {
     private final Context context;
     private OnDataReceivedListener onDataReceivedListener;
 
-    private final UUID MY_UUID = UUID.fromString("00000000-0000-1000-8000-00805F9B34FB");
+    private final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     private PermissionRequestCallback permissionRequestCallback;
 
@@ -67,52 +69,31 @@ public class BluetoothManager {
 
     }
 
-    private void listenForData() {
-        final byte[] buffer = new byte[1024];
-        final int[] bytes = new int[1];
+private void listenForData() {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
         AtomicBoolean isRunning = new AtomicBoolean(true);
 
-        Thread thread = new Thread(() -> {
-            while (isRunning.get()) {
-                try {
-                    bytes[0] = inputStream.read(buffer);
+        executor.submit(() -> {
+            try {
+                byte[] buffer = new byte[1024];
+                int bytes;
+
+                while (isRunning.get() && !Thread.currentThread().isInterrupted()) {
+                    bytes = inputStream.read(buffer);
+                    String data = new String(buffer, 0, bytes);
+
                     handler.post(() -> {
-                        String data = new String(buffer, 0, bytes[0]);
                         if (onDataReceivedListener != null) {
                             onDataReceivedListener.onDataReceived(data);
                         }
                     });
-                } catch (IOException e) {
-                    Log.e("Bluetooth", "Error reading data: " + e.getMessage());
-                    Toast.makeText(context, "Error reading data", Toast.LENGTH_SHORT).show();
-                    isRunning.set(false);
-                    try {
-                        if (bluetoothSocket != null) {
-                            bluetoothSocket.close();
-                        }
-                        if (inputStream != null) {
-                            inputStream.close();
-                        }
-                    } catch (IOException closeException) {
-                        Log.e("Bluetooth", "Error closing resources: " + closeException.getMessage());
-                    }
                 }
-                if (Thread.interrupted()) {
-                    isRunning.set(false);
-                    try {
-                        if (bluetoothSocket != null) {
-                            bluetoothSocket.close();
-                        }
-                        if (inputStream != null) {
-                            inputStream.close();
-                        }
-                    } catch (IOException closeException) {
-                        Log.e("Bluetooth", "Error closing resources: " + closeException.getMessage());
-                    }
-                }
+            } catch (IOException e) {
+                Log.e("Bluetooth", "Error reading data: " + e.getMessage());
+            } finally {
+                closeResources();
             }
         });
-        thread.start();
     }
 
     public void showDeviceListAndConnect(DeviceSelectionCallback callback) {
@@ -166,5 +147,18 @@ public class BluetoothManager {
 
     public void setPermissionRequestCallback(PermissionRequestCallback callback) {
         this.permissionRequestCallback = callback;
+    }
+
+    private void closeResources() {
+        try {
+            if (inputStream != null) {
+                inputStream.close();
+            }
+            if (bluetoothSocket != null) {
+                bluetoothSocket.close();
+            }
+        } catch (IOException e) {
+            Log.e("Bluetooth", "Error closing resources: " + e.getMessage());
+        }
     }
 }

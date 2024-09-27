@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import androidx.appcompat.widget.Toolbar;
 
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -46,6 +47,14 @@ public class TemperatureChartFragment extends Fragment {
         temperatureChart.setData(temperatureLineData);
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        float yLimit = sharedViewModel.getTemperatureYLimit();
+
+        // Apply y-limit to the chart
+        YAxis leftAxis = temperatureChart.getAxisLeft();
+        leftAxis.setAxisMaximum(yLimit);
+        leftAxis.setAxisMinimum(0);  // Set to 0 or any lower bound you prefer
+        temperatureChart.getAxisRight().setEnabled(false); // Disable right axis if not needed
+
         sharedViewModel.getTemperatureEntries().observe(getViewLifecycleOwner(), this::updateChart);
 
         boolean isFullscreen = getArguments() != null && getArguments().getBoolean("isFullscreen", false);

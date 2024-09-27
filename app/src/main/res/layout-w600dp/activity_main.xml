@@ -27,47 +27,124 @@
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize">
         <!-- Navigation Buttons -->
-        <Button
-            android:id="@+id/button_voltage_chart"
+        <GridLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/voltage_chart" />
+            android:columnCount="4"
+            android:rowCount="2"
+            android:layout_gravity="center"
+            android:padding="2dp"
+            android:layout_marginBottom="8dp">
 
-        <Button
-            android:id="@+id/button_temperature_chart"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/temperature_chart" />
+            <!-- Voltage Buttons -->
+            <Button
+                android:id="@+id/button_voltage_chart"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="2"
+                android:text="@string/voltage_chart" />
 
-        <Button
-            android:id="@+id/button_rpm_chart"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/rpm_chart" />
+            <Button
+                android:id="@+id/button_voltage_limit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:text="@string/set_y_limit" />
 
-        <Button
-            android:id="@+id/button_current_chart"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/current_chart" />
+            <!-- Temperature Buttons -->
+            <Button
+                android:id="@+id/button_temperature_chart"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="2"
+                android:text="@string/temperature_chart" />
 
-        <TextView
-            android:id="@+id/text_voltage_current"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Voltage: N/A   Current: N/A"
-            android:textSize="16sp"
-            android:padding="8dp"
-            android:textAlignment="center" />
+            <Button
+                android:id="@+id/button_temperature_limit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:text="@string/set_y_limit" />
 
-        <TextView
-            android:id="@+id/text_temperature_rpm"
+            <!-- RPM Buttons -->
+            <Button
+                android:id="@+id/button_rpm_chart"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="2"
+                android:text="@string/rpm_chart" />
+
+            <Button
+                android:id="@+id/button_rpm_limit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:text="@string/set_y_limit" />
+
+            <!-- Current Buttons -->
+            <Button
+                android:id="@+id/button_current_chart"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="2"
+                android:text="@string/current_chart" />
+
+            <Button
+                android:id="@+id/button_current_limit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:text="@string/set_y_limit" />
+        </GridLayout>
+        <GridLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Temperature: N/A   RPM: N/A"
-            android:textSize="16sp"
-            android:padding="8dp"
-            android:textAlignment="center" />
+            android:columnCount="2"
+            android:rowCount="2"
+            android:layout_gravity="center"
+            android:padding="2dp"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:id="@+id/text_voltage"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:text="@string/voltage_n_a"
+                android:textSize="16sp"
+                android:padding="2dp"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/text_current"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:text="@string/current_n_a"
+                android:textSize="16sp"
+                android:padding="2dp"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/text_temperature"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:text="@string/temperature_n_a"
+                android:textSize="16sp"
+                android:padding="2dp"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/text_rpm"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:text="@string/rpm_n_a"
+                android:textSize="16sp"
+                android:padding="2dp"
+                android:textAlignment="center" />
+        </GridLayout>
 
         <!-- Fragment Container -->
         <FrameLayout

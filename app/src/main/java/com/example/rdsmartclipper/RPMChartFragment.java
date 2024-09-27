@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import androidx.appcompat.widget.Toolbar;
 
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -46,6 +47,13 @@ public class RPMChartFragment extends Fragment {
         rpmChart.setData(rpmLineData);
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        float yLimit = sharedViewModel.getRPMYLimit();
+
+        // Apply y-limit to the chart
+        YAxis leftAxis = rpmChart.getAxisLeft();
+        leftAxis.setAxisMaximum(yLimit);
+        leftAxis.setAxisMinimum(0);  // Set to 0 or any lower bound you prefer
+        rpmChart.getAxisRight().setEnabled(false); // Disable right axis if not needed
         sharedViewModel.getRPMEntries().observe(getViewLifecycleOwner(), this::updateChart);
 
         boolean isFullscreen = getArguments() != null && getArguments().getBoolean("isFullscreen", false);

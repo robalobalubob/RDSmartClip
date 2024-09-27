@@ -16,6 +16,11 @@ public class SharedViewModel extends ViewModel {
     private final MutableLiveData<List<Entry>> rpmEntries = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<List<Entry>> currentEntries = new MutableLiveData<>(new ArrayList<>());
 
+    private float voltageYLimit = 10; // Default value
+    private float temperatureYLimit = 100;
+    private float rpmYLimit = 10000;
+    private float currentYLimit = 10;
+
     private static final int MAX_ENTRIES = 10000; // Or any suitable number
 
     public void addVoltageEntries(List<Entry> entries) {
@@ -48,6 +53,14 @@ public class SharedViewModel extends ViewModel {
         return voltageEntries;
     }
 
+    public float getVoltageYLimit() {
+        return voltageYLimit;
+    }
+
+    public void setVoltageYLimit(float voltageYLimit) {
+        this.voltageYLimit = voltageYLimit;
+    }
+
     public void addTemperatureEntries(List<Entry> entries) {
         List<Entry> currentList = temperatureEntries.getValue();
         if (currentList != null) {
@@ -74,6 +87,14 @@ public class SharedViewModel extends ViewModel {
 
     public LiveData<List<Entry>> getTemperatureEntries() {
         return temperatureEntries;
+    }
+
+    public float getTemperatureYLimit() {
+        return temperatureYLimit;
+    }
+
+    public void setTemperatureYLimit(float temperatureYLimit) {
+        this.temperatureYLimit = temperatureYLimit;
     }
 
     public void addRPMEntries(List<Entry> entries) {
@@ -104,6 +125,15 @@ public class SharedViewModel extends ViewModel {
         return rpmEntries;
     }
 
+    public float getRPMYLimit() {
+        return rpmYLimit;
+    }
+
+    public void setRPMYLimit(float rpmYLimit) {
+        this.rpmYLimit = rpmYLimit;
+    }
+
+
     public void addCurrentEntries(List<Entry> entries) {
         List<Entry> currentList = currentEntries.getValue();
         if (currentList != null) {
@@ -130,6 +160,14 @@ public class SharedViewModel extends ViewModel {
 
     public LiveData<List<Entry>> getCurrentEntries() {
         return currentEntries;
+    }
+
+    public float getCurrentYLimit() {
+        return currentYLimit;
+    }
+
+    public void setCurrentYLimit(float currentYLimit) {
+        this.currentYLimit = currentYLimit;
     }
 
     public void clearAllData() {

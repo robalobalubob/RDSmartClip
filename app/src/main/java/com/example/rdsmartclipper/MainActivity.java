@@ -1,16 +1,15 @@
 package com.example.rdsmartclipper;
 
-import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
-import android.view.MenuItem;
-import android.view.Menu;
-import android.content.Intent;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -20,8 +19,11 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.PreferenceManager;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,10 +33,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 import com.example.rdsmartclipper.databinding.ActivityMainBinding;
 
@@ -45,18 +45,22 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
     private BluetoothManager bluetoothManager;
     private SharedViewModel sharedViewModel;
 
-    private TextView textVoltageCurrent;
-    private TextView textTemperatureRpm;
-
-    private final List<Entry> voltageEntries = new ArrayList<>();
-    private final List<Entry> temperatureEntries = new ArrayList<>();
-    private final List<Entry> rpmEntries = new ArrayList<>();
-    private final List<Entry> currentEntries = new ArrayList<>();
+    private TextView textVoltage;
+    private TextView textCurrent;
+    private TextView textTemperature;
+    private TextView textRPM;
 
     private String voltageText = "Voltage: N/A";
     private String currentText = "Current: N/A";
     private String temperatureText = "Temperature: N/A";
     private String rpmText = "RPM: N/A";
+
+    private static final String VOLTAGE = "Voltage";
+    private static final String TEMPERATURE = "Temperature";
+    private static final String RPM = "RPM";
+    private static final String CURRENT = "Current";
+    private static final String DEBUG_MODE_KEY = "debug_mode";
+    private static final String FULLSCREEN_MODE_KEY = "fullscreen_mode";
 
     private boolean isDebugMode = false;
     private boolean isFullscreenMode = true;
@@ -72,8 +76,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPrefs.registerOnSharedPreferenceChangeListener(prefListener);
 
-        isDebugMode = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("debug_mode", false);
-        isFullscreenMode = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("fullscreen_mode", true);
+        isDebugMode = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(DEBUG_MODE_KEY, false);
+        isFullscreenMode = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(FULLSCREEN_MODE_KEY, true);
         lastKnownFullscreenMode = isFullscreenMode;
 
         if (!isDebugMode) {
@@ -92,18 +96,13 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
 
         sharedViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
 
-        Button voltageButton = binding.buttonVoltageChart;
-        Button temperatureButton = binding.buttonTemperatureChart;
-        Button rpmButton = binding.buttonRpmChart;
-        Button currentButton = binding.buttonCurrentChart;
+        //Create text elements
+        textVoltage = binding.textVoltage;
+        textCurrent = binding.textCurrent;
+        textTemperature = binding.textTemperature;
+        textRPM = binding.textRpm;
 
-        textVoltageCurrent = binding.textVoltageCurrent;
-        textTemperatureRpm = binding.textTemperatureRpm;
-
-        voltageButton.setOnClickListener(v -> openFragment(new VoltageChartFragment(),isFullscreenMode));
-        temperatureButton.setOnClickListener(v -> openFragment(new TemperatureChartFragment(),isFullscreenMode));
-        rpmButton.setOnClickListener(v -> openFragment(new RPMChartFragment(),isFullscreenMode));
-        currentButton.setOnClickListener(v -> openFragment(new CurrentChartFragment(),isFullscreenMode));
+        setupButtons();
 
         observeData();
 
@@ -137,16 +136,56 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
         updateToolbarNavigationIcon();
     }
 
+    private void showYLimitDialog(String chartType) {
+        // Create an AlertDialog for input
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Set Y-Limit for " + chartType + " Chart");
+
+        // Set up the input field
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        builder.setView(input);
+
+        // Set up the buttons
+        builder.setPositiveButton("OK", (dialog, which) -> {
+            String userInput = input.getText().toString();
+            if (!userInput.isEmpty()) {
+                float yLimit = Float.parseFloat(userInput);
+                applyYLimit(chartType, yLimit);
+            }
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+
+        builder.show();
+    }
+
+    private void applyYLimit(String chartType, float yLimit) {
+        switch (chartType) {
+            case VOLTAGE:
+                sharedViewModel.setVoltageYLimit(yLimit);
+                break;
+            case TEMPERATURE:
+                sharedViewModel.setTemperatureYLimit(yLimit);
+                break;
+            case RPM:
+                sharedViewModel.setRPMYLimit(yLimit);
+                break;
+            case CURRENT:
+                sharedViewModel.setCurrentYLimit(yLimit);
+                break;
+        }
+    }
+
 
     private final SharedPreferences.OnSharedPreferenceChangeListener prefListener = (sharedPreferences, key) -> {
-        if ("debug_mode".equals(key)) {
+        if (DEBUG_MODE_KEY.equals(key)) {
             // Update mode
-            isDebugMode = sharedPreferences.getBoolean("debug_mode", false);
+            isDebugMode = sharedPreferences.getBoolean(DEBUG_MODE_KEY, false);
             // Handle mode change
             handleModeChange();
-        } else if ("fullscreen_mode".equals(key)) {
+        } else if (FULLSCREEN_MODE_KEY.equals(key)) {
             // Update fullscreen mode
-            isFullscreenMode = sharedPreferences.getBoolean("fullscreen_mode", true);
+            isFullscreenMode = sharedPreferences.getBoolean(FULLSCREEN_MODE_KEY, true);
             Toast.makeText(this, "Fullscreen mode will apply the next time you open a chart.", Toast.LENGTH_SHORT).show();
         }
     };
@@ -159,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
                 updateVoltageText(voltage);
             } else {
                 voltageText = "Voltage: N/A";
-                textVoltageCurrent.setText(voltageText + "   " + currentText);
+                textVoltage.setText(voltageText);
             }
         });
 
@@ -170,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
                 updateCurrentText(current);
             } else {
                 currentText = "Current: N/A";
-                textVoltageCurrent.setText(voltageText + "   " + currentText);
+                textCurrent.setText(currentText);
             }
         });
 
@@ -182,7 +221,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
                 updateTemperatureText(temperature);
             } else {
                 temperatureText = "Temperature: N/A";
-                textTemperatureRpm.setText(temperatureText + "   " + rpmText);
+                textTemperature.setText(temperatureText);
             }
         });
 
@@ -193,33 +232,29 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
                 updateRPMText(rpm);
             } else {
                 rpmText = "Temperature: N/A";
-                textTemperatureRpm.setText(temperatureText + "   " + rpmText);
+                textRPM.setText(rpmText);
             }
         });
     }
 
-    @SuppressLint("SetTextI18n")
     private void updateVoltageText(float voltage) {
         voltageText = String.format(Locale.getDefault(), "Voltage: %.2f V", voltage);
-        textVoltageCurrent.setText(voltageText + "   " + currentText);
+        textVoltage.setText(voltageText);
     }
 
-    @SuppressLint("SetTextI18n")
     private void updateCurrentText(float current) {
         currentText = String.format(Locale.getDefault(), "Current: %.2f A", current);
-        textVoltageCurrent.setText(voltageText + "   " + currentText);
+        textCurrent.setText(currentText);
     }
 
-    @SuppressLint("SetTextI18n")
     private void updateTemperatureText(float temperature) {
         temperatureText = String.format(Locale.getDefault(), "Temperature: %.2f°C", temperature);
-        textTemperatureRpm.setText(temperatureText + "   " + rpmText);
+        textTemperature.setText(temperatureText);
     }
 
-    @SuppressLint("SetTextI18n")
     private void updateRPMText(float rpm) {
         rpmText = String.format(Locale.getDefault(), "RPM: %.0f", rpm);
-        textTemperatureRpm.setText(temperatureText + "   " + rpmText);
+        textRPM.setText(rpmText);
     }
 
 
@@ -255,15 +290,12 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
         rpmText = "RPM: N/A";
 
         // Update TextViews
-        textVoltageCurrent.setText(voltageText + "   " + currentText);
-        textTemperatureRpm.setText(temperatureText + "   " + rpmText);
+        textVoltage.setText(voltageText);
+        textCurrent.setText(currentText);
+        textTemperature.setText(temperatureText);
+        textRPM.setText(rpmText);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.toolbar_menu, menu);
-        return true;
-    }
 
     private void readDataFromFile() {
         new Thread(() -> {
@@ -369,20 +401,6 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
         getOnBackPressedDispatcher().addCallback(this, callback);
     }
 
-
-
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            Intent intent = new Intent(this, SettingsActivity.class);
-            startActivity(intent);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     @Override
     public void onDataReceived(String data) {
         new Thread(() -> parseCSVData(data)).start();
@@ -411,7 +429,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
         super.onResume();
 
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean currentFullscreenMode = sharedPrefs.getBoolean("fullscreen_mode", true);
+        boolean currentFullscreenMode = sharedPrefs.getBoolean(FULLSCREEN_MODE_KEY, true);
 
         if (currentFullscreenMode != lastKnownFullscreenMode) {
             // The fullscreen mode setting has changed
@@ -425,6 +443,49 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
             binding.mainContent.setVisibility(View.VISIBLE);
             binding.fullscreenFragmentContainer.setVisibility(View.GONE);
         }
+    }
+
+    private void setupChartButton(Button chartButton, Fragment fragment) {
+        chartButton.setOnClickListener(v -> openFragment(fragment, isFullscreenMode));
+    }
+
+    private void setupLimitButton(Button limitButton, String chartType) {
+        limitButton.setOnClickListener(v -> showYLimitDialog(chartType));
+    }
+
+    private void setupButtons() {
+        setupChartButton(binding.buttonVoltageChart, new VoltageChartFragment());
+        setupChartButton(binding.buttonTemperatureChart, new TemperatureChartFragment());
+        setupChartButton(binding.buttonRpmChart, new RPMChartFragment());
+        setupChartButton(binding.buttonCurrentChart, new CurrentChartFragment());
+
+        setupLimitButton(binding.buttonVoltageLimit, VOLTAGE);
+        setupLimitButton(binding.buttonTemperatureLimit, TEMPERATURE);
+        setupLimitButton(binding.buttonRpmLimit, RPM);
+        setupLimitButton(binding.buttonCurrentLimit, CURRENT);
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu with the settings item
+        getMenuInflater().inflate(R.menu.toolbar_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        // Handle action bar item clicks
+        int id = item.getItemId();
+
+        if (id == R.id.action_settings) {
+            // Navigate to the Settings activity
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(intent);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
 }
