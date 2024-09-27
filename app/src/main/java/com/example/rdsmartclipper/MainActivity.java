@@ -3,6 +3,7 @@ package com.example.rdsmartclipper;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.Menu;
 import android.content.Intent;
@@ -11,14 +12,16 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.PreferenceManager;
+import androidx.lifecycle.ViewModelProvider;
 
+import android.widget.Button;
 import android.widget.Toast;
 
-import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -34,8 +37,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
 
 
     private BluetoothManager bluetoothManager;
+    private SharedViewModel sharedViewModel;
 
-    private LineChart voltageChart, temperatureChart, rpmChart, currentChart;
     private final List<Entry> voltageEntries = new ArrayList<>();
     private final List<Entry> temperatureEntries = new ArrayList<>();
     private final List<Entry> rpmEntries = new ArrayList<>();
@@ -61,32 +64,74 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
         bluetoothManager.setPermissionRequestCallback(requestCode -> ActivityCompat.requestPermissions(MainActivity.this,
                 new String[]{android.Manifest.permission.BLUETOOTH_CONNECT}, requestCode));
 
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-        toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
-
-
-        voltageChart = findViewById(R.id.voltage_chart);
-        temperatureChart = findViewById(R.id.temperature_chart);
-        rpmChart = findViewById(R.id.rpm_chart);
-        currentChart = findViewById(R.id.current_chart);
         if (!isDebugMode) {
             bluetoothManager.showDeviceListAndConnect(macAddress -> bluetoothManager.connectToDevice(macAddress));
         } else {
             readDataFromFile();
         }
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+
+        sharedViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
+
+        Button voltageButton = findViewById(R.id.button_voltage_chart);
+        Button temperatureButton = findViewById(R.id.button_temperature_chart);
+        Button rpmButton = findViewById(R.id.button_rpm_chart);
+        Button currentButton = findViewById(R.id.button_current_chart);
+        voltageButton.setOnClickListener(v -> openFragment(new VoltageChartFragment()));
+        temperatureButton.setOnClickListener(v -> openFragment(new TemperatureChartFragment()));
+        rpmButton.setOnClickListener(v -> openFragment(new RPMChartFragment()));
+        currentButton.setOnClickListener(v -> openFragment(new CurrentChartFragment()));
+
     }
 
-    private final SharedPreferences.OnSharedPreferenceChangeListener prefListener =
-            (sharedPreferences, key) -> {
-                assert key != null;
-                if (key.equals("debug_mode")) {
-                    updateChartsBasedOnDebugMode();
-                }
-            };
+    private void openFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        fragmentTransaction.replace(R.id.fragment_container,fragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+    }
+
+
+    private final SharedPreferences.OnSharedPreferenceChangeListener prefListener = (sharedPreferences, key) -> {
+        if ("debug_mode".equals(key)) {
+            // Update mode
+            isDebugMode = sharedPreferences.getBoolean("debug_mode", false);
+            // Handle mode change
+            handleModeChange();
+        }
+    };
+
+    private void handleModeChange() {
+        // Clear existing data
+        clearData();
+
+        if (isDebugMode) {
+            // Disconnect Bluetooth if connected
+            // Read data from file
+            readDataFromFile();
+        } else {
+            // Initialize Bluetooth manager if not already done
+            if (bluetoothManager == null) {
+                bluetoothManager = new BluetoothManager(this);
+                bluetoothManager.setOnDataReceivedListener(this);
+                bluetoothManager.setPermissionRequestCallback(requestCode -> ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{android.Manifest.permission.BLUETOOTH_CONNECT}, requestCode));
+            }
+            // Start Bluetooth connection
+            bluetoothManager.showDeviceListAndConnect(macAddress -> bluetoothManager.connectToDevice(macAddress));
+        }
+    }
+
+    private void clearData() {
+        // Clear data in ViewModel
+        sharedViewModel.clearAllData();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -95,16 +140,19 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
     }
 
     private void readDataFromFile() {
-        try {
-            InputStream inputStream = getResources().openRawResource(R.raw.data);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                parseCSVData(line);
+        new Thread(() -> {
+            try {
+                InputStream inputStream = getResources().openRawResource(R.raw.data);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    parseCSVData(line);
+                }
+            } catch (IOException e) {
+                Log.e("MainActivity", "Failed to read data file.", e);
+                runOnUiThread(() -> Toast.makeText(this, "Failed to read data file.", Toast.LENGTH_SHORT).show());
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        }).start();
     }
 
     private void parseCSVData(String data) {
@@ -118,43 +166,14 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
             currentEntries.add(new Entry(point.time, point.current));
         }
 
-        updateCharts();
+        runOnUiThread(() -> {
+            sharedViewModel.addVoltageEntries(voltageEntries);
+            sharedViewModel.addTemperatureEntries(temperatureEntries);
+            sharedViewModel.addRPMEntries(rpmEntries);
+            sharedViewModel.addCurrentEntries(currentEntries);
+        });
     }
 
-    private void updateChartsBasedOnDebugMode() {
-        isDebugMode = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("debug_mode", false);
-
-        voltageEntries.clear();
-        temperatureEntries.clear();
-        rpmEntries.clear();
-        currentEntries.clear();
-
-        if (isDebugMode) {
-            readDataFromFile();
-        } else {
-            bluetoothManager.showDeviceListAndConnect(macAddress -> bluetoothManager.connectToDevice(macAddress));
-            // Make sure to clear existing data and stop any ongoing Bluetooth data reading
-        }
-
-        updateCharts(); // Update charts with new data
-    }
-
-    private void updateCharts() {
-        LineDataSet voltageDataSet = new LineDataSet(voltageEntries, "Voltage");
-        LineDataSet temperatureDataSet = new LineDataSet(temperatureEntries, "Temperature");
-        LineDataSet rpmDataSet = new LineDataSet(rpmEntries, "RPM");
-        LineDataSet currentDataSet = new LineDataSet(currentEntries, "Current");
-
-        voltageChart.setData(new LineData(voltageDataSet));
-        temperatureChart.setData(new LineData(temperatureDataSet));
-        rpmChart.setData(new LineData(rpmDataSet));
-        currentChart.setData(new LineData(currentDataSet));
-
-        voltageChart.invalidate(); // Refresh the chart
-        temperatureChart.invalidate();
-        rpmChart.invalidate();
-        currentChart.invalidate();
-    }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {

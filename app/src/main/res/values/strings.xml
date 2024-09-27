@@ -23,4 +23,9 @@
         item
     </string>
     <string name="settings">Settings</string>
+    <string name="title_activity_voltage_chart">VoltageChartActivity</string>
+    <string name="voltage_chart">Voltage Chart</string>
+    <string name="temperature_chart">Temperature Chart</string>
+    <string name="rpm_chart">RPM Chart</string>
+    <string name="current_chart">Current Chart</string>
 </resources>

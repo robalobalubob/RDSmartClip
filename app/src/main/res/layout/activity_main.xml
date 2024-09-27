@@ -1,13 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-Wrap the DrawerLayout with FrameLayout to use the same View type for the same view ID
-across the layout configurations
--->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/activity_container"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-
+    android:layout_height="match_parent">
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
@@ -20,27 +16,35 @@ across the layout configurations
             android:background="?attr/colorPrimary" />
 
     </com.google.android.material.appbar.AppBarLayout>
-    <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/voltage_chart"
+    <!-- Navigation Buttons -->
+    <Button
+        android:id="@+id/button_voltage_chart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/voltage_chart" />
+
+    <Button
+        android:id="@+id/button_temperature_chart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/temperature_chart" />
+
+    <Button
+        android:id="@+id/button_rpm_chart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/rpm_chart" />
+
+    <Button
+        android:id="@+id/button_current_chart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/current_chart" />
+
+    <!-- Fragment Container -->
+    <FrameLayout
+        android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
-
-    <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/temperature_chart"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"  />
-
-    <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/rpm_chart"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"  />
-
-    <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/current_chart"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"  />
 </LinearLayout>
