@@ -38,6 +38,10 @@ import java.util.Locale;
 
 import com.example.rdsmartclipper.databinding.ActivityMainBinding;
 
+/**
+ * MainActivity
+ * Creates and initializes the main view of the application.
+ */
 public class MainActivity extends AppCompatActivity implements BluetoothManager.OnDataReceivedListener, BluetoothManager.PermissionRequestCallback {
 
     private ActivityMainBinding binding;
@@ -50,11 +54,13 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
     private TextView textTemperature;
     private TextView textRPM;
 
+    //default text, updated with new data
     private String voltageText = "Voltage: N/A";
     private String currentText = "Current: N/A";
     private String temperatureText = "Temperature: N/A";
     private String rpmText = "RPM: N/A";
 
+    //Key strings
     private static final String VOLTAGE = "Voltage";
     private static final String TEMPERATURE = "Temperature";
     private static final String RPM = "RPM";
@@ -62,24 +68,36 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
     private static final String DEBUG_MODE_KEY = "debug_mode";
     private static final String FULLSCREEN_MODE_KEY = "fullscreen_mode";
 
+    //Mode checks
     private boolean isDebugMode = false;
     private boolean isFullscreenMode = true;
     private boolean lastKnownFullscreenMode = true;
 
+    /**
+     *
+     * @param savedInstanceState If the activity is being re-initialized after
+     *     previously being shut down then this Bundle contains the data it most
+     *     recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
+     *
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //Set up binding
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        //Set up preferences
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPrefs.registerOnSharedPreferenceChangeListener(prefListener);
 
+        //Establish modes
         isDebugMode = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(DEBUG_MODE_KEY, false);
         isFullscreenMode = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(FULLSCREEN_MODE_KEY, true);
         lastKnownFullscreenMode = isFullscreenMode;
 
+        //If not in debug mode, establish Bluetooth
         if (!isDebugMode) {
             bluetoothManager = new BluetoothManager(this);
 
@@ -91,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
             readDataFromFile();
         }
 
+        //Set up toolbar
         Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
 
@@ -102,13 +121,19 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
         textTemperature = binding.textTemperature;
         textRPM = binding.textRpm;
 
+        //Call set up buttons
         setupButtons();
-
+        //Observe data for changes
         observeData();
-
+        //Prep for back navigation
         handleBackNavigation();
     }
 
+    /**
+     * Opens a fragment chart in either fullscreen or non-fullscreen mode.
+     * @param fragment Fragment to be opened, one of the chart options
+     * @param fullscreen Whether or not the fragment is opened in fullscreen
+     */
     private void openFragment(Fragment fragment, Boolean fullscreen) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -136,6 +161,10 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
         updateToolbarNavigationIcon();
     }
 
+    /**
+     * Displays the dialog for setting the Y-limit for a chart.
+     * @param chartType String that represents the type of chart
+     */
     private void showYLimitDialog(String chartType) {
         // Create an AlertDialog for input
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -159,6 +188,11 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
         builder.show();
     }
 
+    /**
+     * Applies the Y-limit to a chart.
+     * @param chartType Type of chart to apply the limit to
+     * @param yLimit The y-limit value to apply
+     */
     private void applyYLimit(String chartType, float yLimit) {
         switch (chartType) {
             case VOLTAGE:
@@ -176,7 +210,9 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
         }
     }
 
-
+    /**
+     * Handles when preferences change
+     */
     private final SharedPreferences.OnSharedPreferenceChangeListener prefListener = (sharedPreferences, key) -> {
         if (DEBUG_MODE_KEY.equals(key)) {
             // Update mode
@@ -190,7 +226,11 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
         }
     };
 
+    /**
+     * Updates the text elements with the latest data from the ViewModel
+     */
     private void observeData() {
+        //Observer for Voltage
         sharedViewModel.getVoltageEntries().observe(this, entries -> {
             if (entries != null && !entries.isEmpty()) {
                 Entry latestEntry = entries.get(entries.size() - 1);
@@ -202,6 +242,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
             }
         });
 
+        //Observer for Current
         sharedViewModel.getCurrentEntries().observe(this, entries -> {
             if (entries != null && !entries.isEmpty()) {
                 Entry latestEntry = entries.get(entries.size() - 1);
@@ -213,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
             }
         });
 
-
+        //Observer for Temperature
         sharedViewModel.getTemperatureEntries().observe(this, entries -> {
             if (entries != null && !entries.isEmpty()) {
                 Entry latestEntry = entries.get(entries.size() - 1);
@@ -225,39 +266,58 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
             }
         });
 
+        //Observer for RPM
         sharedViewModel.getRPMEntries().observe(this, entries -> {
             if (entries != null && !entries.isEmpty()) {
                 Entry latestEntry = entries.get(entries.size() - 1);
                 float rpm = latestEntry.getY();
                 updateRPMText(rpm);
             } else {
-                rpmText = "Temperature: N/A";
+                rpmText = "RPM: N/A";
                 textRPM.setText(rpmText);
             }
         });
     }
 
+    /**
+     * Updates the text element with the latest voltage data.
+     * @param voltage Voltage to update text to
+     */
     private void updateVoltageText(float voltage) {
         voltageText = String.format(Locale.getDefault(), "Voltage: %.2f V", voltage);
         textVoltage.setText(voltageText);
     }
 
+    /**
+     * Updates the text element with the latest current data.
+     * @param current Current to update text to
+     */
     private void updateCurrentText(float current) {
         currentText = String.format(Locale.getDefault(), "Current: %.2f A", current);
         textCurrent.setText(currentText);
     }
 
+    /**
+     * Updates the text element with the latest temperature data.
+     * @param temperature Temperature to update text to
+     */
     private void updateTemperatureText(float temperature) {
         temperatureText = String.format(Locale.getDefault(), "Temperature: %.2f°C", temperature);
         textTemperature.setText(temperatureText);
     }
 
+    /**
+     * Updates the text element with the latest RPM data.
+     * @param rpm RPM to update text to
+     */
     private void updateRPMText(float rpm) {
         rpmText = String.format(Locale.getDefault(), "RPM: %.0f", rpm);
         textRPM.setText(rpmText);
     }
 
-
+    /**
+     * Handles when Debug mode is toggled on and off.
+     */
     private void handleModeChange() {
         // Clear existing data
         clearData();
@@ -279,6 +339,9 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
         }
     }
 
+    /**
+     * Clears all data in the ViewModel and resets local variables.
+     */
     private void clearData() {
         // Clear data in ViewModel
         sharedViewModel.clearAllData();
@@ -296,7 +359,10 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
         textRPM.setText(rpmText);
     }
 
-
+    /**
+     * Reads data from file and parses it.
+     * Only used in debug mode
+     */
     private void readDataFromFile() {
         new Thread(() -> {
             try {
@@ -315,6 +381,10 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
         }).start();
     }
 
+    /**
+     * Parses the CSV data and adds it to the ViewModel.
+     * @param data Data to be added to the ViewModel
+     */
     private void parseCSVData(String data) {
         CSVParser csvParser = new CSVParser();
         List<DataPoint> dataPoints = csvParser.parseCSV(data);
@@ -335,6 +405,9 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
         }
     }
 
+    /**
+     * Updates the toolbar navigation icon based on the back stack.
+     */
     private void updateToolbarNavigationIcon() {
         int backStackEntryCount = getSupportFragmentManager().getBackStackEntryCount();
         if (getSupportActionBar() != null) {
@@ -342,6 +415,9 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
         }
     }
 
+    /**
+     * Handles when the back button is pressed.
+     */
     private void handleBackNavigation() {
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
@@ -401,17 +477,34 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
         getOnBackPressedDispatcher().addCallback(this, callback);
     }
 
+    /**
+     * Called when data is received from the BluetoothManager.
+     * @param data Data received from the BluetoothManager
+     */
     @Override
     public void onDataReceived(String data) {
         new Thread(() -> parseCSVData(data)).start();
     }
 
+    /**
+     * Requests the Bluetooth connect permission.
+     * @param requestCode Request code to use when requesting the permission
+     */
     @Override
     public void requestBluetoothConnectPermission(int requestCode) {
         ActivityCompat.requestPermissions(this,
                 new String[]{android.Manifest.permission.BLUETOOTH_CONNECT}, requestCode);
     }
 
+    /**
+     * Called when the user responds to the permission request.
+     * @param requestCode The request code passed
+     * @param permissions The requested permissions. Never null.
+     * @param grantResults The grant results for the corresponding permissions
+     *     which is either {@link android.content.pm.PackageManager#PERMISSION_GRANTED}
+     *     or {@link android.content.pm.PackageManager#PERMISSION_DENIED}. Never null.
+     *
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -424,6 +517,10 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
         }
     }
 
+    /**
+     * Called when the activity is resumed.
+     * Handles whether or not the fullscreen mode should be applied.
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -445,14 +542,27 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
         }
     }
 
+    /**
+     * Sets up a button to be clicked on to open a chart.
+     * @param chartButton Button to be clicked on
+     * @param fragment Fragment to be opened
+     */
     private void setupChartButton(Button chartButton, Fragment fragment) {
         chartButton.setOnClickListener(v -> openFragment(fragment, isFullscreenMode));
     }
 
+    /**
+     * Sets up a button to be clicked on to set the Y-limit for a chart.
+     * @param limitButton Button to be clicked on
+     * @param chartType Type of chart to set the Y-limit for
+     */
     private void setupLimitButton(Button limitButton, String chartType) {
         limitButton.setOnClickListener(v -> showYLimitDialog(chartType));
     }
 
+    /**
+     * Called to set up all buttons.
+     */
     private void setupButtons() {
         setupChartButton(binding.buttonVoltageChart, new VoltageChartFragment());
         setupChartButton(binding.buttonTemperatureChart, new TemperatureChartFragment());
@@ -465,7 +575,12 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
         setupLimitButton(binding.buttonCurrentLimit, CURRENT);
     }
 
-
+    /**
+     * Displays options menu
+     * @param menu The options menu in which you place your items.
+     *
+     * @return True if the menu is displayed. Always true
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu with the settings item
@@ -473,6 +588,12 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
         return true;
     }
 
+    /**
+     * Called when an item in the options menu is selected.
+     * @param item The menu item that was selected.
+     *
+     * @return True
+     */
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         // Handle action bar item clicks

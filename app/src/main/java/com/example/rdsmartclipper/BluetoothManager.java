@@ -23,20 +23,30 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * BluetoothManager class
+ * Handles listening for data over Bluetooth.
+ * Handles creating the bluetooth connection
+ */
 public class BluetoothManager {
-
+    //Establish necessary objects
     private final BluetoothAdapter bluetoothAdapter;
     private BluetoothSocket bluetoothSocket;
     private final Handler handler = new Handler();
     private InputStream inputStream;
     private final Context context;
     private OnDataReceivedListener onDataReceivedListener;
-
+    //Establish UUID
     private final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     private PermissionRequestCallback permissionRequestCallback;
 
+    /**
+     * Constructor for BluetoothManager
+     * @param context Context of the application
+     */
     public BluetoothManager(Context context) {
+        // Initialize the BluetoothAdapter
         this.context = context;
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
@@ -44,7 +54,12 @@ public class BluetoothManager {
         }
     }
 
+    /**
+     * Connects to a device over Bluetooth
+     * @param macAddress MAC address of the device
+     */
     public void connectToDevice(String macAddress) {
+        // Check for Bluetooth connect permission
         if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_CONNECT)
                 != PackageManager.PERMISSION_GRANTED) {
             if (permissionRequestCallback != null) {
@@ -52,11 +67,14 @@ public class BluetoothManager {
             }
             return;
         }
+        // Check valid MAC address
         if(macAddress == null ||macAddress.isEmpty()){
             Toast.makeText(context, "Invalid MAC address", Toast.LENGTH_SHORT).show();
             return;
         }
+        // Get the remote device
         BluetoothDevice device = bluetoothAdapter.getRemoteDevice(macAddress);
+        // Attempt to connect
         try {
             bluetoothSocket = device.createRfcommSocketToServiceRecord(MY_UUID);
             bluetoothSocket.connect();
@@ -69,12 +87,17 @@ public class BluetoothManager {
 
     }
 
-private void listenForData() {
+    /**
+     * Listens for data over Bluetooth
+     */
+    private void listenForData() {
+        // Create a new thread to listen for data
         ExecutorService executor = Executors.newSingleThreadExecutor();
         AtomicBoolean isRunning = new AtomicBoolean(true);
 
         executor.submit(() -> {
             try {
+                // Read data from the input stream
                 byte[] buffer = new byte[1024];
                 int bytes;
 
@@ -96,7 +119,12 @@ private void listenForData() {
         });
     }
 
+    /**
+     * Shows a dialog to select a device from a list of paired devices
+     * @param callback Callback to handle the selected device
+     */
     public void showDeviceListAndConnect(DeviceSelectionCallback callback) {
+        // Check for Bluetooth connect permission
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT)
                 != PackageManager.PERMISSION_GRANTED) {
             if (permissionRequestCallback != null) {
@@ -104,8 +132,10 @@ private void listenForData() {
             }
             return;
         }
+        // Get a list of paired devices
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
         List<String> deviceNames = new ArrayList<>();
+        // Add paired devices to the list
         if (!pairedDevices.isEmpty()) {
             for (BluetoothDevice device : pairedDevices) {
                 String deviceName = device.getName();
@@ -118,6 +148,7 @@ private void listenForData() {
             return; // Or handle the case with no paired devices
         }
 
+        // Show a dialog to select a device
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Select a device");
         builder.setItems(deviceNames.toArray(new String[0]), (dialog, which) -> {
@@ -129,26 +160,46 @@ private void listenForData() {
         dialog.show();
     }
 
+    /**
+     * Interface for handling data received over Bluetooth
+     */
     public interface OnDataReceivedListener {
         void onDataReceived(String data);
     }
 
+    /**
+     * Interface for handling device selection
+     */
     public interface DeviceSelectionCallback {
         void onDeviceSelected(String macAddress);
     }
 
+    /**
+     * Interface for handling permission requests
+     */
     public interface PermissionRequestCallback {
         void requestBluetoothConnectPermission(int requestCode);
     }
 
+    /**
+     * Sets the listener for data received over Bluetooth
+     * @param listener Listener to set
+     */
     public void setOnDataReceivedListener(OnDataReceivedListener listener) {
         this.onDataReceivedListener = listener;
     }
 
+    /**
+     * Sets the callback for permission requests
+     * @param callback Callback to set
+     */
     public void setPermissionRequestCallback(PermissionRequestCallback callback) {
         this.permissionRequestCallback = callback;
     }
 
+    /**
+     * Closes the input stream and the Bluetooth socket
+     */
     private void closeResources() {
         try {
             if (inputStream != null) {

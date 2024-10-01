@@ -20,24 +20,44 @@ import com.github.mikephil.charting.data.LineDataSet;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
+/**
+ * CurrentChartFragment class
+ */
 public class CurrentChartFragment extends Fragment {
     private LineChart currentChart;
-    private SharedViewModel sharedViewModel;
     private LineDataSet currentDataSet;
     private LineData currentLineData;
 
-    public CurrentChartFragment() {
+    /**
+     * Necessary empty Constructor
+     */
+    public CurrentChartFragment() { }
 
-    }
-
+    /**
+     * Called to have the fragment instantiate its user interface view.
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return Return the View for the fragment's UI, or null.
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_current_chart, container, false);
     }
 
+    /**
+     * Formats the chart and prepares the display
+     * @param view The View returned by {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         currentChart = view.findViewById(R.id.current_chart);
@@ -46,14 +66,14 @@ public class CurrentChartFragment extends Fragment {
         currentLineData = new LineData(currentDataSet);
         currentChart.setData(currentLineData);
 
-        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         float yLimit = sharedViewModel.getCurrentYLimit();
 
         // Apply y-limit to the chart
         YAxis leftAxis = currentChart.getAxisLeft();
         leftAxis.setAxisMaximum(yLimit);
-        leftAxis.setAxisMinimum(0);  // Set to 0 or any lower bound you prefer
-        currentChart.getAxisRight().setEnabled(false); // Disable right axis if not needed
+        leftAxis.setAxisMinimum(0);  // Lower bound set to 0
+        currentChart.getAxisRight().setEnabled(false); // Disable right axis
 
         sharedViewModel.getCurrentEntries().observe(getViewLifecycleOwner(), this::updateChart);
 
@@ -74,6 +94,10 @@ public class CurrentChartFragment extends Fragment {
         }
     }
 
+    /**
+     * Updates the chart with new data
+     * @param entries List of entries to add to the chart
+     */
     private void updateChart(List<Entry> entries) {
         currentDataSet.setValues(entries);
         currentLineData.notifyDataChanged();
@@ -81,13 +105,18 @@ public class CurrentChartFragment extends Fragment {
         currentChart.invalidate();
     }
 
+    /**
+     * Called when the fragment is no longer in use.
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         // Reset toolbar
         AppCompatActivity activity = (AppCompatActivity) requireActivity();
-        Objects.requireNonNull(activity.getSupportActionBar()).setDisplayHomeAsUpEnabled(false);
-        activity.getSupportActionBar().setTitle("SmartClip");
+        if (activity.getSupportActionBar() != null) {
+            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            activity.getSupportActionBar().setTitle("SmartClip");
+        }
 
         // Remove navigation click listener
         Toolbar toolbar = activity.findViewById(R.id.toolbar);

@@ -5,11 +5,22 @@ import java.util.List;
 
 //voltage, current, RPM, temp, roll, pitch, yaw, acceleration, time
 
+/**
+ * CSVParser class
+ * Parses CSV data into a list of DataPoint objects
+ */
 public class CSVParser {
+    /**
+     * Parses CSV data into a list of DataPoint objects
+     * @param data String of CSV data to be parsed
+     * @return List of DataPoint objects
+     */
     public List<DataPoint> parseCSV(String data) {
+        // Establish data points
         List<DataPoint> dataPoints = new ArrayList<>();
         String[] rows = data.split("\n");
 
+        // Parse each row
         for (String row : rows) {
             String[] columns = row.split(",");
             if (columns.length == 5) {
