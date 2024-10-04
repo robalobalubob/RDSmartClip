@@ -3,10 +3,12 @@ package com.example.rdsmartclipper;
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
+import android.os.Looper;
 import android.widget.Toast;
 import android.util.Log;
 
@@ -28,11 +30,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Handles listening for data over Bluetooth.
  * Handles creating the bluetooth connection
  */
-public class BluetoothManager {
+public class myBluetoothManager {
     //Establish necessary objects
     private final BluetoothAdapter bluetoothAdapter;
     private BluetoothSocket bluetoothSocket;
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private InputStream inputStream;
     private final Context context;
     private OnDataReceivedListener onDataReceivedListener;
@@ -45,10 +47,11 @@ public class BluetoothManager {
      * Constructor for BluetoothManager
      * @param context Context of the application
      */
-    public BluetoothManager(Context context) {
+    public myBluetoothManager(Context context) {
         // Initialize the BluetoothAdapter
         this.context = context;
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        BluetoothManager BluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+        bluetoothAdapter = BluetoothManager.getAdapter();
         if (bluetoothAdapter == null) {
             Toast.makeText(context, "Bluetooth is not available", Toast.LENGTH_SHORT).show();
         }

@@ -19,6 +19,10 @@ public class SharedViewModel extends ViewModel {
     private final MutableLiveData<List<Entry>> temperatureEntries = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<List<Entry>> rpmEntries = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<List<Entry>> currentEntries = new MutableLiveData<>(new ArrayList<>());
+
+    // LiveData for rotation data
+    private final MutableLiveData<RotationData> rotationData = new MutableLiveData<>();
+
     // Y-axis limits
     private float voltageYLimit = 10; // Default value
     private float temperatureYLimit = 100;
@@ -189,6 +193,14 @@ public class SharedViewModel extends ViewModel {
      */
     public void setCurrentYLimit(float currentYLimit) {
         this.currentYLimit = currentYLimit;
+    }
+
+    public void setRotationData(float roll, float pitch, float yaw) {
+        rotationData.postValue(new RotationData(roll, pitch, yaw));
+    }
+
+    public LiveData<RotationData> getRotationData() {
+        return rotationData;
     }
 
     /**

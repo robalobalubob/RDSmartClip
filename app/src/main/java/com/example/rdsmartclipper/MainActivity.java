@@ -1,9 +1,14 @@
 package com.example.rdsmartclipper;
 
+import android.Manifest;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.content.Context;
+import android.os.IBinder;
 import android.text.InputType;
 import android.util.Log;
 
@@ -42,11 +47,13 @@ import com.example.rdsmartclipper.databinding.ActivityMainBinding;
  * MainActivity
  * Creates and initializes the main view of the application.
  */
-public class MainActivity extends AppCompatActivity implements BluetoothManager.OnDataReceivedListener, BluetoothManager.PermissionRequestCallback {
+public class MainActivity extends AppCompatActivity implements BluetoothService.BluetoothDataCallback {
 
     private ActivityMainBinding binding;
 
-    private BluetoothManager bluetoothManager;
+    // Replace myBluetoothManager with BluetoothService
+    private BluetoothService bluetoothService;
+    private boolean isServiceBound = false;
     private SharedViewModel sharedViewModel;
 
     private TextView textVoltage;
@@ -54,13 +61,13 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
     private TextView textTemperature;
     private TextView textRPM;
 
-    //default text, updated with new data
+    // Default text, updated with new data
     private String voltageText = "Voltage: N/A";
     private String currentText = "Current: N/A";
     private String temperatureText = "Temperature: N/A";
     private String rpmText = "RPM: N/A";
 
-    //Key strings
+    // Key strings
     private static final String VOLTAGE = "Voltage";
     private static final String TEMPERATURE = "Temperature";
     private static final String RPM = "RPM";
@@ -68,13 +75,35 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
     private static final String DEBUG_MODE_KEY = "debug_mode";
     private static final String FULLSCREEN_MODE_KEY = "fullscreen_mode";
 
-    //Mode checks
+    // Mode checks
     private boolean isDebugMode = false;
     private boolean isFullscreenMode = true;
     private boolean lastKnownFullscreenMode = true;
 
+    private static final int REQUEST_BLUETOOTH_PERMISSIONS = 1;
+
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            BluetoothService.LocalBinder binder = (BluetoothService.LocalBinder) service;
+            bluetoothService = binder.getService();
+            isServiceBound = true;
+
+            // Register the callback to receive Bluetooth data
+            bluetoothService.registerCallback(MainActivity.this);
+
+            // Show device list and connect
+            showDeviceListAndConnect();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            isServiceBound = false;
+            bluetoothService = null;
+        }
+    };
+
     /**
-     *
      * @param savedInstanceState If the activity is being re-initialized after
      *     previously being shut down then this Bundle contains the data it most
      *     recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
@@ -84,49 +113,113 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //Set up binding
+        // Set up binding
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        //Set up preferences
+        // Set up preferences
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPrefs.registerOnSharedPreferenceChangeListener(prefListener);
 
-        //Establish modes
-        isDebugMode = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(DEBUG_MODE_KEY, false);
-        isFullscreenMode = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(FULLSCREEN_MODE_KEY, true);
+        // Establish modes
+        isDebugMode = sharedPrefs.getBoolean(DEBUG_MODE_KEY, false);
+        isFullscreenMode = sharedPrefs.getBoolean(FULLSCREEN_MODE_KEY, true);
         lastKnownFullscreenMode = isFullscreenMode;
 
-        //If not in debug mode, establish Bluetooth
-        if (!isDebugMode) {
-            bluetoothManager = new BluetoothManager(this);
-
-            bluetoothManager.setOnDataReceivedListener(this);
-            bluetoothManager.setPermissionRequestCallback(requestCode -> ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{android.Manifest.permission.BLUETOOTH_CONNECT}, requestCode));
-            bluetoothManager.showDeviceListAndConnect(macAddress -> bluetoothManager.connectToDevice(macAddress));
-        } else {
-            readDataFromFile();
-        }
-
-        //Set up toolbar
+        // Set up toolbar
         Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
 
         sharedViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
 
-        //Create text elements
+        // Create text elements
         textVoltage = binding.textVoltage;
         textCurrent = binding.textCurrent;
         textTemperature = binding.textTemperature;
         textRPM = binding.textRpm;
 
-        //Call set up buttons
+        // Call set up buttons
         setupButtons();
-        //Observe data for changes
+        // Observe data for changes
         observeData();
-        //Prep for back navigation
+        // Prep for back navigation
         handleBackNavigation();
+
+        // Check permissions and start Bluetooth or read from file
+        if (!isDebugMode) {
+            Log.d("MainActivity", "App is in normal mode, checking permissions");
+            checkAndRequestBluetoothPermissions();
+        } else {
+            Log.d("MainActivity", "App is in debug mode, reading data from file");
+            readDataFromFile();
+        }
+    }
+
+    private void checkAndRequestBluetoothPermissions() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{
+                            Manifest.permission.BLUETOOTH_CONNECT,
+                            Manifest.permission.BLUETOOTH_SCAN
+                    },
+                    REQUEST_BLUETOOTH_PERMISSIONS);
+        } else {
+            startAndBindBluetoothService();
+        }
+    }
+
+
+    private void startAndBindBluetoothService() {
+        Intent intent = new Intent(this, BluetoothService.class);
+        startService(intent);
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    private void showDeviceListAndConnect() {
+        if (isServiceBound && bluetoothService != null) {
+            List<String> deviceList = bluetoothService.getPairedDevices();
+            if (deviceList.isEmpty()) {
+                Toast.makeText(this, "No paired Bluetooth devices found.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Select Bluetooth Device");
+            builder.setItems(deviceList.toArray(new String[0]), (dialog, which) -> {
+                String deviceInfo = deviceList.get(which);
+                String macAddress = deviceInfo.substring(deviceInfo.length() - 17);
+                bluetoothService.connectToDevice(macAddress);
+            });
+            builder.show();
+        }
+    }
+
+    /**
+     * Handles the result of permission requests.
+     * @param requestCode The request code passed
+     * @param permissions The requested permissions. Never null.
+     * @param grantResults The grant results for the corresponding permissions
+     *     which is either {@link android.content.pm.PackageManager#PERMISSION_GRANTED}
+     *     or {@link android.content.pm.PackageManager#PERMISSION_DENIED}. Never null.
+     *
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_BLUETOOTH_PERMISSIONS) {
+            boolean permissionsGranted = true;
+            for (int result : grantResults) {
+                permissionsGranted = permissionsGranted && (result == PackageManager.PERMISSION_GRANTED);
+            }
+
+            if (permissionsGranted) {
+                startAndBindBluetoothService();
+            } else {
+                Toast.makeText(this, "Bluetooth permissions denied", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     /**
@@ -230,7 +323,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
      * Updates the text elements with the latest data from the ViewModel
      */
     private void observeData() {
-        //Observer for Voltage
+        // Observer for Voltage
         sharedViewModel.getVoltageEntries().observe(this, entries -> {
             if (entries != null && !entries.isEmpty()) {
                 Entry latestEntry = entries.get(entries.size() - 1);
@@ -242,7 +335,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
             }
         });
 
-        //Observer for Current
+        // Observer for Current
         sharedViewModel.getCurrentEntries().observe(this, entries -> {
             if (entries != null && !entries.isEmpty()) {
                 Entry latestEntry = entries.get(entries.size() - 1);
@@ -254,7 +347,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
             }
         });
 
-        //Observer for Temperature
+        // Observer for Temperature
         sharedViewModel.getTemperatureEntries().observe(this, entries -> {
             if (entries != null && !entries.isEmpty()) {
                 Entry latestEntry = entries.get(entries.size() - 1);
@@ -266,7 +359,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
             }
         });
 
-        //Observer for RPM
+        // Observer for RPM
         sharedViewModel.getRPMEntries().observe(this, entries -> {
             if (entries != null && !entries.isEmpty()) {
                 Entry latestEntry = entries.get(entries.size() - 1);
@@ -323,19 +416,18 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
         clearData();
 
         if (isDebugMode) {
-            // Disconnect Bluetooth if connected
+            // Stop Bluetooth service if running
+            if (isServiceBound) {
+                unbindService(serviceConnection);
+                isServiceBound = false;
+            }
+            stopService(new Intent(this, BluetoothService.class));
+
             // Read data from file
             readDataFromFile();
         } else {
-            // Initialize Bluetooth manager if not already done
-            if (bluetoothManager == null) {
-                bluetoothManager = new BluetoothManager(this);
-                bluetoothManager.setOnDataReceivedListener(this);
-                bluetoothManager.setPermissionRequestCallback(requestCode -> ActivityCompat.requestPermissions(MainActivity.this,
-                        new String[]{android.Manifest.permission.BLUETOOTH_CONNECT}, requestCode));
-            }
-            // Start Bluetooth connection
-            bluetoothManager.showDeviceListAndConnect(macAddress -> bluetoothManager.connectToDevice(macAddress));
+            // Check permissions and start Bluetooth
+            checkAndRequestBluetoothPermissions();
         }
     }
 
@@ -371,10 +463,9 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
                 String line;
                 while ((line = reader.readLine()) != null) {
                     // Simulate real-time data by adding a delay
-                    Thread.sleep(1000); // Adjust delay as needed
                     parseCSVData(line);
                 }
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException e) {
                 Log.e("MainActivity", "Failed to read data file.", e);
                 runOnUiThread(() -> Toast.makeText(this, "Failed to read data file.", Toast.LENGTH_SHORT).show());
             }
@@ -401,9 +492,15 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
                 sharedViewModel.addTemperatureEntry(temperatureEntry);
                 sharedViewModel.addRPMEntry(rpmEntry);
                 sharedViewModel.addCurrentEntry(currentEntry);
+
+                // Check if rotation data is available
+                if (point.roll != 0 || point.pitch != 0 || point.yaw != 0) {
+                    sharedViewModel.setRotationData(point.roll, point.pitch, point.yaw);
+                }
             });
         }
     }
+
 
     /**
      * Updates the toolbar navigation icon based on the back stack.
@@ -478,43 +575,12 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
     }
 
     /**
-     * Called when data is received from the BluetoothManager.
-     * @param data Data received from the BluetoothManager
+     * Called when data is received from the BluetoothService.
+     * @param data Data received from the BluetoothService
      */
     @Override
-    public void onDataReceived(String data) {
+    public void onBluetoothDataReceived(String data) {
         new Thread(() -> parseCSVData(data)).start();
-    }
-
-    /**
-     * Requests the Bluetooth connect permission.
-     * @param requestCode Request code to use when requesting the permission
-     */
-    @Override
-    public void requestBluetoothConnectPermission(int requestCode) {
-        ActivityCompat.requestPermissions(this,
-                new String[]{android.Manifest.permission.BLUETOOTH_CONNECT}, requestCode);
-    }
-
-    /**
-     * Called when the user responds to the permission request.
-     * @param requestCode The request code passed
-     * @param permissions The requested permissions. Never null.
-     * @param grantResults The grant results for the corresponding permissions
-     *     which is either {@link android.content.pm.PackageManager#PERMISSION_GRANTED}
-     *     or {@link android.content.pm.PackageManager#PERMISSION_DENIED}. Never null.
-     *
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 1) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                bluetoothManager.showDeviceListAndConnect(macAddress -> bluetoothManager.connectToDevice(macAddress));
-            } else {
-                Toast.makeText(this, "Bluetooth connect permission denied", Toast.LENGTH_SHORT).show();
-            }
-        }
     }
 
     /**
@@ -609,4 +675,53 @@ public class MainActivity extends AppCompatActivity implements BluetoothManager.
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Show the device selection dialog to the user.
+     */
+    private void showDeviceSelectionDialog() {
+        if (!isServiceBound) {
+            Toast.makeText(this, "Bluetooth service not bound", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Check Bluetooth permissions
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            // Request permissions if not granted
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.BLUETOOTH_CONNECT},
+                    1);
+            return;
+        }
+
+        List<String> pairedDevices = bluetoothService.getPairedDevices();
+        if (pairedDevices.isEmpty()) {
+            Toast.makeText(this, "No paired devices found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Select a Bluetooth device");
+        builder.setItems(pairedDevices.toArray(new String[0]), (dialog, which) -> {
+            // Extract MAC address from the selected item
+            String selectedDevice = pairedDevices.get(which);
+            String macAddress = selectedDevice.substring(selectedDevice.length() - 17);
+
+            // Connect to the selected device
+            bluetoothService.connectToDevice(macAddress);
+        });
+        builder.show();
+    }
+
+    /**
+     * Unbinds and stops the BluetoothService when the activity is destroyed.
+     */
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (isServiceBound) {
+            unbindService(serviceConnection);
+            isServiceBound = false;
+        }
+        stopService(new Intent(this, BluetoothService.class));
+    }
 }
