@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/charts_fragment_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp">
+
+    <!-- Voltage Chart Row -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <Button
+            android:id="@+id/button_voltage_chart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Voltage Chart" />
+
+        <Button
+            android:id="@+id/button_voltage_limit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Set Y-Limits" />
+    </LinearLayout>
+
+    <!-- Repeat for other charts -->
+    <!-- Current Chart Row -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <Button
+            android:id="@+id/button_current_chart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Current Chart" />
+
+        <Button
+            android:id="@+id/button_current_limit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Set Y-Limits" />
+    </LinearLayout>
+
+    <!-- Acceleration Chart Row -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <Button
+            android:id="@+id/button_acceleration_chart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Acceleration Chart" />
+
+        <Button
+            android:id="@+id/button_acceleration_limit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Set Y-Limits" />
+    </LinearLayout>
+
+    <!-- RPM Chart Row -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <Button
+            android:id="@+id/button_rpm_chart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="RPM Chart" />
+
+        <Button
+            android:id="@+id/button_rpm_limit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Set Y-Limits" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -28,9 +28,12 @@
     <string name="temperature_chart">Temperature Chart</string>
     <string name="rpm_chart">RPM Chart</string>
     <string name="current_chart">Current Chart</string>
-    <string name="set_y_limit">Set Y-Limit</string>
+    <string name="set_y_limit">Y-Limit</string>
     <string name="voltage_n_a">Voltage: N/A</string>
     <string name="current_n_a">Current: N/A</string>
     <string name="temperature_n_a">Temperature: N/A</string>
     <string name="rpm_n_a">RPM: N/A</string>
+    <string name="acceleration_chart">Acceleration Chart</string>
+    <string name="combined_charts">Combined Chart</string>
+    <string name="acceleration_n_a">Acceleration: N/A</string>
 </resources>

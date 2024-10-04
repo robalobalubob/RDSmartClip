@@ -19,15 +19,31 @@ public class SharedViewModel extends ViewModel {
     private final MutableLiveData<List<Entry>> temperatureEntries = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<List<Entry>> rpmEntries = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<List<Entry>> currentEntries = new MutableLiveData<>(new ArrayList<>());
+    private final MutableLiveData<List<Entry>> accelerationEntries = new MutableLiveData<>(new ArrayList<>());
 
     // LiveData for rotation data
     private final MutableLiveData<RotationData> rotationData = new MutableLiveData<>();
 
-    // Y-axis limits
-    private float voltageYLimit = 10; // Default value
-    private float temperatureYLimit = 100;
-    private float rpmYLimit = 10000;
-    private float currentYLimit = 10;
+
+    // Voltage Y-Limits
+    private MutableLiveData<Float> voltageLowerYLimit = new MutableLiveData<>(null);
+    private MutableLiveData<Float> voltageUpperYLimit = new MutableLiveData<>(null);
+
+    // Current Y-Limits
+    private MutableLiveData<Float> currentLowerYLimit = new MutableLiveData<>(null);
+    private MutableLiveData<Float> currentUpperYLimit = new MutableLiveData<>(null);
+
+    // Acceleration Y-Limits
+    private MutableLiveData<Float> accelerationLowerYLimit = new MutableLiveData<>(null);
+    private MutableLiveData<Float> accelerationUpperYLimit = new MutableLiveData<>(null);
+
+    // RPM Y-Limits
+    private MutableLiveData<Float> rpmLowerYLimit = new MutableLiveData<>(null);
+    private MutableLiveData<Float> rpmUpperYLimit = new MutableLiveData<>(null);
+
+    // Temperature Y-Limits
+    private MutableLiveData<Float> temperatureLowerYLimit = new MutableLiveData<>(null);
+    private MutableLiveData<Float> temperatureUpperYLimit = new MutableLiveData<>(null);
     // Maximum number of entries to keep
     private static final int MAX_ENTRIES = 10000; // Or any suitable number
 
@@ -56,20 +72,17 @@ public class SharedViewModel extends ViewModel {
         return voltageEntries;
     }
 
-    /**
-     * Gets the Y-axis limit for voltage
-     * @return Y-axis limit for voltage
-     */
-    public float getVoltageYLimit() {
-        return voltageYLimit;
+    public void setVoltageYLimits(Float lowerLimit, Float upperLimit) {
+        voltageLowerYLimit.setValue(lowerLimit);
+        voltageUpperYLimit.setValue(upperLimit);
     }
 
-    /**
-     * Sets the Y-axis limit for voltage
-     * @param voltageYLimit Y-axis limit for voltage
-     */
-    public void setVoltageYLimit(float voltageYLimit) {
-        this.voltageYLimit = voltageYLimit;
+    public LiveData<Float> getVoltageLowerYLimit() {
+        return voltageLowerYLimit;
+    }
+
+    public LiveData<Float> getVoltageUpperYLimit() {
+        return voltageUpperYLimit;
     }
 
     /**
@@ -97,20 +110,17 @@ public class SharedViewModel extends ViewModel {
         return temperatureEntries;
     }
 
-    /**
-     * Gets the Y-axis limit for temperature
-     * @return Y-axis limit for temperature
-     */
-    public float getTemperatureYLimit() {
-        return temperatureYLimit;
+    public void setTemperatureYLimits(Float lowerLimit, Float upperLimit) {
+        temperatureLowerYLimit.setValue(lowerLimit);
+        temperatureUpperYLimit.setValue(upperLimit);
     }
 
-    /**
-     * Sets the Y-axis limit for temperature
-     * @param temperatureYLimit Y-axis limit for temperature
-     */
-    public void setTemperatureYLimit(float temperatureYLimit) {
-        this.temperatureYLimit = temperatureYLimit;
+    public LiveData<Float> getTemperatureLowerYLimit() {
+        return temperatureLowerYLimit;
+    }
+
+    public LiveData<Float> getTemperatureUpperYLimit() {
+        return temperatureUpperYLimit;
     }
 
     /**
@@ -138,20 +148,17 @@ public class SharedViewModel extends ViewModel {
         return rpmEntries;
     }
 
-    /**
-     * Gets the Y-axis limit for RPM
-     * @return Y-axis limit for RPM
-     */
-    public float getRPMYLimit() {
-        return rpmYLimit;
+    public void setRPMYLimits(Float lowerLimit, Float upperLimit) {
+        rpmLowerYLimit.setValue(lowerLimit);
+        rpmUpperYLimit.setValue(upperLimit);
     }
 
-    /**
-     * Sets the Y-axis limit for RPM
-     * @param rpmYLimit Y-axis limit for RPM
-     */
-    public void setRPMYLimit(float rpmYLimit) {
-        this.rpmYLimit = rpmYLimit;
+    public LiveData<Float> getRPMLowerYLimit() {
+        return rpmLowerYLimit;
+    }
+
+    public LiveData<Float> getRPMUpperYLimit() {
+        return rpmUpperYLimit;
     }
 
     /**
@@ -179,20 +186,17 @@ public class SharedViewModel extends ViewModel {
         return currentEntries;
     }
 
-    /**
-     * Gets the Y-axis limit for current
-     * @return Y-axis limit for current
-     */
-    public float getCurrentYLimit() {
-        return currentYLimit;
+    public void setCurrentYLimits(Float lowerLimit, Float upperLimit) {
+        currentLowerYLimit.setValue(lowerLimit);
+        currentUpperYLimit.setValue(upperLimit);
     }
 
-    /**
-     * Sets the Y-axis limit for current
-     * @param currentYLimit Y-axis limit for current
-     */
-    public void setCurrentYLimit(float currentYLimit) {
-        this.currentYLimit = currentYLimit;
+    public LiveData<Float> getCurrentLowerYLimit() {
+        return currentLowerYLimit;
+    }
+
+    public LiveData<Float> getCurrentUpperYLimit() {
+        return currentUpperYLimit;
     }
 
     public void setRotationData(float roll, float pitch, float yaw) {
@@ -201,6 +205,31 @@ public class SharedViewModel extends ViewModel {
 
     public LiveData<RotationData> getRotationData() {
         return rotationData;
+    }
+
+    public LiveData<List<Entry>> getAccelerationEntries() {
+        return accelerationEntries;
+    }
+
+    public void addAccelerationEntry(Entry entry) {
+        List<Entry> entries = accelerationEntries.getValue();
+        if (entries != null) {
+            entries.add(entry);
+            accelerationEntries.setValue(entries);
+        }
+    }
+
+    public void setAccelerationYLimits(Float lowerLimit, Float upperLimit) {
+        accelerationLowerYLimit.setValue(lowerLimit);
+        accelerationUpperYLimit.setValue(upperLimit);
+    }
+
+    public LiveData<Float> getAccelerationLowerYLimit() {
+        return accelerationLowerYLimit;
+    }
+
+    public LiveData<Float> getAccelerationUpperYLimit() {
+        return accelerationUpperYLimit;
     }
 
     /**

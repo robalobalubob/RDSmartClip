@@ -1,107 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main_coordinator_layout"
+    android:id="@+id/main_constraint_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <!-- AppBar with Toolbar -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="match_parent"
             android:background="?attr/colorPrimary"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
     </com.google.android.material.appbar.AppBarLayout>
-    <LinearLayout
+
+    <!-- Bottom Navigation Bar -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp"
+        app:menu="@menu/bottom_nav_menu" />
+
+    <!-- Main Content Container -->
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main_content"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize">
-        <!-- Navigation Buttons -->
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/app_bar_layout"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Data Display -->
         <GridLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:columnCount="4"
-            android:rowCount="2"
-            android:layout_gravity="center"
-            android:padding="2dp"
-            android:layout_marginBottom="8dp">
-
-            <!-- Voltage Buttons -->
-            <Button
-                android:id="@+id/button_voltage_chart"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="2"
-                android:text="@string/voltage_chart" />
-
-            <Button
-                android:id="@+id/button_voltage_limit"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:text="@string/set_y_limit" />
-
-            <!-- Temperature Buttons -->
-            <Button
-                android:id="@+id/button_temperature_chart"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="2"
-                android:text="@string/temperature_chart" />
-
-            <Button
-                android:id="@+id/button_temperature_limit"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:text="@string/set_y_limit" />
-
-            <!-- RPM Buttons -->
-            <Button
-                android:id="@+id/button_rpm_chart"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="2"
-                android:text="@string/rpm_chart" />
-
-            <Button
-                android:id="@+id/button_rpm_limit"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:text="@string/set_y_limit" />
-
-            <!-- Current Buttons -->
-            <Button
-                android:id="@+id/button_current_chart"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="2"
-                android:text="@string/current_chart" />
-
-            <Button
-                android:id="@+id/button_current_limit"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:text="@string/set_y_limit" />
-        </GridLayout>
-        <GridLayout
-            android:layout_width="match_parent"
+            android:id="@+id/data_display"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:columnCount="2"
             android:rowCount="2"
-            android:layout_gravity="center"
+            app:layout_constraintTop_toBottomOf="@id/navigation_buttons"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             android:padding="2dp"
             android:layout_marginBottom="8dp">
 
@@ -126,11 +79,11 @@
                 android:textAlignment="center" />
 
             <TextView
-                android:id="@+id/text_temperature"
+                android:id="@+id/text_acceleration"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
-                android:text="@string/temperature_n_a"
+                android:text="@string/acceleration_n_a"
                 android:textSize="16sp"
                 android:padding="2dp"
                 android:textAlignment="center" />
@@ -144,20 +97,39 @@
                 android:textSize="16sp"
                 android:padding="2dp"
                 android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/text_temperature"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:text="@string/temperature_n_a"
+                android:textSize="16sp"
+                android:padding="2dp"
+                android:textAlignment="center" />
         </GridLayout>
 
         <!-- Fragment Container -->
         <FrameLayout
             android:id="@+id/fragment_container"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_weight="1" />
-    </LinearLayout>
+            app:layout_constraintTop_toBottomOf="@id/data_display"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Fullscreen Fragment Container -->
     <FrameLayout
         android:id="@+id/fullscreen_fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone" />
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

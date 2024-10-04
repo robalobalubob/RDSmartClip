@@ -12,6 +12,8 @@ import android.os.IBinder;
 import android.text.InputType;
 import android.util.Log;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -60,18 +62,21 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
     private TextView textCurrent;
     private TextView textTemperature;
     private TextView textRPM;
+    private TextView textAcceleration;
 
     // Default text, updated with new data
     private String voltageText = "Voltage: N/A";
     private String currentText = "Current: N/A";
     private String temperatureText = "Temperature: N/A";
     private String rpmText = "RPM: N/A";
+    private String accelerationText = "Acceleration: N/A";
 
     // Key strings
     private static final String VOLTAGE = "Voltage";
     private static final String TEMPERATURE = "Temperature";
     private static final String RPM = "RPM";
     private static final String CURRENT = "Current";
+    private static final String ACCELERATION = "Acceleration";
     private static final String DEBUG_MODE_KEY = "debug_mode";
     private static final String FULLSCREEN_MODE_KEY = "fullscreen_mode";
 
@@ -130,6 +135,32 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
         Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
 
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.navigation_home) {
+                // Show main content
+                binding.mainContent.setVisibility(View.VISIBLE);
+                // Hide any fragments
+                getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                return true;
+            } else if (itemId == R.id.navigation_charts) {
+                // Open CombinedChartFragment
+                openFragment(new ChartsFragment(), isFullscreenMode);
+                return true;
+            } else if (itemId == R.id.navigation_combined_chart) {
+                // Open AccelerationChartFragment
+                openFragment(new CombinedChartFragment(), isFullscreenMode);
+                return true;
+            } else if (itemId == R.id.navigation_settings) {
+                // Navigate to settings
+                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(intent);
+                return true;
+            }
+            return false;
+        });
+
         sharedViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
 
         // Create text elements
@@ -137,9 +168,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
         textCurrent = binding.textCurrent;
         textTemperature = binding.textTemperature;
         textRPM = binding.textRpm;
+        textAcceleration = binding.textAcceleration;
 
-        // Call set up buttons
-        setupButtons();
         // Observe data for changes
         observeData();
         // Prep for back navigation
@@ -227,7 +257,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
      * @param fragment Fragment to be opened, one of the chart options
      * @param fullscreen Whether or not the fragment is opened in fullscreen
      */
-    private void openFragment(Fragment fragment, Boolean fullscreen) {
+    public void openFragment(Fragment fragment, Boolean fullscreen) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
@@ -300,6 +330,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
             case CURRENT:
                 sharedViewModel.setCurrentYLimit(yLimit);
                 break;
+            case ACCELERATION:
+                sharedViewModel.setAccelerationYLimit(yLimit);
         }
     }
 
@@ -370,6 +402,17 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
                 textRPM.setText(rpmText);
             }
         });
+
+        sharedViewModel.getAccelerationEntries().observe(this, entries -> {
+            if (entries != null && !entries.isEmpty()) {
+                Entry latestEntry = entries.get(entries.size() - 1);
+                float acceleration = latestEntry.getY();
+                updateAccelerationText(acceleration);
+            } else {
+                accelerationText = "Acceleration: N/A";
+                textAcceleration.setText(accelerationText);
+            }
+        });
     }
 
     /**
@@ -406,6 +449,11 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
     private void updateRPMText(float rpm) {
         rpmText = String.format(Locale.getDefault(), "RPM: %.0f", rpm);
         textRPM.setText(rpmText);
+    }
+
+    private void updateAccelerationText(float acceleration) {
+        accelerationText = String.format(Locale.getDefault(), "Acceleration: %.0f", acceleration);
+        textAcceleration.setText(accelerationText);
     }
 
     /**
@@ -485,6 +533,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
             Entry temperatureEntry = new Entry(point.time, point.temperature);
             Entry rpmEntry = new Entry(point.time, point.rpm);
             Entry currentEntry = new Entry(point.time, point.current);
+            Entry accelerationEntry = new Entry(point.time, point.acceleration);
 
             // Update ViewModel on the main thread
             runOnUiThread(() -> {
@@ -492,6 +541,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
                 sharedViewModel.addTemperatureEntry(temperatureEntry);
                 sharedViewModel.addRPMEntry(rpmEntry);
                 sharedViewModel.addCurrentEntry(currentEntry);
+                sharedViewModel.addAccelerationEntry(accelerationEntry);
 
                 // Check if rotation data is available
                 if (point.roll != 0 || point.pitch != 0 || point.yaw != 0) {
@@ -609,39 +659,6 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
     }
 
     /**
-     * Sets up a button to be clicked on to open a chart.
-     * @param chartButton Button to be clicked on
-     * @param fragment Fragment to be opened
-     */
-    private void setupChartButton(Button chartButton, Fragment fragment) {
-        chartButton.setOnClickListener(v -> openFragment(fragment, isFullscreenMode));
-    }
-
-    /**
-     * Sets up a button to be clicked on to set the Y-limit for a chart.
-     * @param limitButton Button to be clicked on
-     * @param chartType Type of chart to set the Y-limit for
-     */
-    private void setupLimitButton(Button limitButton, String chartType) {
-        limitButton.setOnClickListener(v -> showYLimitDialog(chartType));
-    }
-
-    /**
-     * Called to set up all buttons.
-     */
-    private void setupButtons() {
-        setupChartButton(binding.buttonVoltageChart, new VoltageChartFragment());
-        setupChartButton(binding.buttonTemperatureChart, new TemperatureChartFragment());
-        setupChartButton(binding.buttonRpmChart, new RPMChartFragment());
-        setupChartButton(binding.buttonCurrentChart, new CurrentChartFragment());
-
-        setupLimitButton(binding.buttonVoltageLimit, VOLTAGE);
-        setupLimitButton(binding.buttonTemperatureLimit, TEMPERATURE);
-        setupLimitButton(binding.buttonRpmLimit, RPM);
-        setupLimitButton(binding.buttonCurrentLimit, CURRENT);
-    }
-
-    /**
      * Displays options menu
      * @param menu The options menu in which you place your items.
      *
@@ -673,43 +690,6 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * Show the device selection dialog to the user.
-     */
-    private void showDeviceSelectionDialog() {
-        if (!isServiceBound) {
-            Toast.makeText(this, "Bluetooth service not bound", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Check Bluetooth permissions
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            // Request permissions if not granted
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.BLUETOOTH_CONNECT},
-                    1);
-            return;
-        }
-
-        List<String> pairedDevices = bluetoothService.getPairedDevices();
-        if (pairedDevices.isEmpty()) {
-            Toast.makeText(this, "No paired devices found", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Select a Bluetooth device");
-        builder.setItems(pairedDevices.toArray(new String[0]), (dialog, which) -> {
-            // Extract MAC address from the selected item
-            String selectedDevice = pairedDevices.get(which);
-            String macAddress = selectedDevice.substring(selectedDevice.length() - 17);
-
-            // Connect to the selected device
-            bluetoothService.connectToDevice(macAddress);
-        });
-        builder.show();
     }
 
     /**
