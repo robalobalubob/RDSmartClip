@@ -26,24 +26,24 @@ public class SharedViewModel extends ViewModel {
 
 
     // Voltage Y-Limits
-    private MutableLiveData<Float> voltageLowerYLimit = new MutableLiveData<>(null);
-    private MutableLiveData<Float> voltageUpperYLimit = new MutableLiveData<>(null);
+    private MutableLiveData<Float> voltageLowerYLimit = new MutableLiveData<>((float)0);
+    private MutableLiveData<Float> voltageUpperYLimit = new MutableLiveData<>((float)8);
 
     // Current Y-Limits
-    private MutableLiveData<Float> currentLowerYLimit = new MutableLiveData<>(null);
-    private MutableLiveData<Float> currentUpperYLimit = new MutableLiveData<>(null);
+    private MutableLiveData<Float> currentLowerYLimit = new MutableLiveData<>((float)-5);
+    private MutableLiveData<Float> currentUpperYLimit = new MutableLiveData<>((float)5);
 
     // Acceleration Y-Limits
-    private MutableLiveData<Float> accelerationLowerYLimit = new MutableLiveData<>(null);
-    private MutableLiveData<Float> accelerationUpperYLimit = new MutableLiveData<>(null);
+    private MutableLiveData<Float> accelerationLowerYLimit = new MutableLiveData<>((float)0);
+    private MutableLiveData<Float> accelerationUpperYLimit = new MutableLiveData<>((float)10);
 
     // RPM Y-Limits
-    private MutableLiveData<Float> rpmLowerYLimit = new MutableLiveData<>(null);
-    private MutableLiveData<Float> rpmUpperYLimit = new MutableLiveData<>(null);
+    private MutableLiveData<Float> rpmLowerYLimit = new MutableLiveData<>((float)7000);
+    private MutableLiveData<Float> rpmUpperYLimit = new MutableLiveData<>((float)1200);
 
     // Temperature Y-Limits
-    private MutableLiveData<Float> temperatureLowerYLimit = new MutableLiveData<>(null);
-    private MutableLiveData<Float> temperatureUpperYLimit = new MutableLiveData<>(null);
+    private MutableLiveData<Float> temperatureLowerYLimit = new MutableLiveData<>((float)0);
+    private MutableLiveData<Float> temperatureUpperYLimit = new MutableLiveData<>((float)90);
     // Maximum number of entries to keep
     private static final int MAX_ENTRIES = 10000; // Or any suitable number
 

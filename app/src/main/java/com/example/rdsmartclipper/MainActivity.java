@@ -9,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.content.Context;
 import android.os.IBinder;
-import android.text.InputType;
 import android.util.Log;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -29,8 +28,6 @@ import androidx.lifecycle.ViewModelProvider;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -72,11 +69,6 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
     private String accelerationText = "Acceleration: N/A";
 
     // Key strings
-    private static final String VOLTAGE = "Voltage";
-    private static final String TEMPERATURE = "Temperature";
-    private static final String RPM = "RPM";
-    private static final String CURRENT = "Current";
-    private static final String ACCELERATION = "Acceleration";
     private static final String DEBUG_MODE_KEY = "debug_mode";
     private static final String FULLSCREEN_MODE_KEY = "fullscreen_mode";
 
@@ -285,57 +277,6 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
     }
 
     /**
-     * Displays the dialog for setting the Y-limit for a chart.
-     * @param chartType String that represents the type of chart
-     */
-    private void showYLimitDialog(String chartType) {
-        // Create an AlertDialog for input
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Set Y-Limit for " + chartType + " Chart");
-
-        // Set up the input field
-        final EditText input = new EditText(this);
-        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        builder.setView(input);
-
-        // Set up the buttons
-        builder.setPositiveButton("OK", (dialog, which) -> {
-            String userInput = input.getText().toString();
-            if (!userInput.isEmpty()) {
-                float yLimit = Float.parseFloat(userInput);
-                applyYLimit(chartType, yLimit);
-            }
-        });
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-
-        builder.show();
-    }
-
-    /**
-     * Applies the Y-limit to a chart.
-     * @param chartType Type of chart to apply the limit to
-     * @param yLimit The y-limit value to apply
-     */
-    private void applyYLimit(String chartType, float yLimit) {
-        switch (chartType) {
-            case VOLTAGE:
-                sharedViewModel.setVoltageYLimit(yLimit);
-                break;
-            case TEMPERATURE:
-                sharedViewModel.setTemperatureYLimit(yLimit);
-                break;
-            case RPM:
-                sharedViewModel.setRPMYLimit(yLimit);
-                break;
-            case CURRENT:
-                sharedViewModel.setCurrentYLimit(yLimit);
-                break;
-            case ACCELERATION:
-                sharedViewModel.setAccelerationYLimit(yLimit);
-        }
-    }
-
-    /**
      * Handles when preferences change
      */
     private final SharedPreferences.OnSharedPreferenceChangeListener prefListener = (sharedPreferences, key) -> {
@@ -347,6 +288,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
         } else if (FULLSCREEN_MODE_KEY.equals(key)) {
             // Update fullscreen mode
             isFullscreenMode = sharedPreferences.getBoolean(FULLSCREEN_MODE_KEY, true);
+
             Toast.makeText(this, "Fullscreen mode will apply the next time you open a chart.", Toast.LENGTH_SHORT).show();
         }
     };

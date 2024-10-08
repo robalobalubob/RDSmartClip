@@ -21,6 +21,7 @@ public class ChartsFragment extends Fragment {
     private static final String CURRENT = "Current";
     private static final String ACCELERATION = "Acceleration";
     private static final String RPM = "RPM";
+    private static final String TEMPERATURE = "Temperature";
 
     public ChartsFragment() {
         // Required empty public constructor
@@ -39,22 +40,26 @@ public class ChartsFragment extends Fragment {
         Button currentChartButton = view.findViewById(R.id.button_current_chart);
         Button accelerationChartButton = view.findViewById(R.id.button_acceleration_chart);
         Button rpmChartButton = view.findViewById(R.id.button_rpm_chart);
+        Button temperatureChartButton = view.findViewById(R.id.button_temperature_chart);
 
         voltageChartButton.setOnClickListener(v -> openChartFragment(new VoltageChartFragment()));
         currentChartButton.setOnClickListener(v -> openChartFragment(new CurrentChartFragment()));
         accelerationChartButton.setOnClickListener(v -> openChartFragment(new AccelerationChartFragment()));
         rpmChartButton.setOnClickListener(v -> openChartFragment(new RPMChartFragment()));
+        temperatureChartButton.setOnClickListener(v -> openChartFragment(new TemperatureChartFragment()));
 
         // Setup Y-Limit buttons
         Button voltageLimitButton = view.findViewById(R.id.button_voltage_limit);
         Button currentLimitButton = view.findViewById(R.id.button_current_limit);
         Button accelerationLimitButton = view.findViewById(R.id.button_acceleration_limit);
         Button rpmLimitButton = view.findViewById(R.id.button_rpm_limit);
+        Button temperatureLimitButton = view.findViewById(R.id.button_temperature_limit);
 
         voltageLimitButton.setOnClickListener(v -> showYLimitDialog(VOLTAGE));
         currentLimitButton.setOnClickListener(v -> showYLimitDialog(CURRENT));
         accelerationLimitButton.setOnClickListener(v -> showYLimitDialog(ACCELERATION));
         rpmLimitButton.setOnClickListener(v -> showYLimitDialog(RPM));
+        temperatureLimitButton.setOnClickListener(v -> showYLimitDialog(TEMPERATURE));
     }
 
     private void openChartFragment(Fragment fragment) {
@@ -119,6 +124,9 @@ public class ChartsFragment extends Fragment {
                 break;
             case RPM:
                 sharedViewModel.setRPMYLimits(lowerLimit, upperLimit);
+                break;
+            case TEMPERATURE:
+                sharedViewModel.setTemperatureYLimits(lowerLimit, upperLimit);
                 break;
             default:
                 break;

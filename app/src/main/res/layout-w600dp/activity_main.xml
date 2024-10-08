@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main_constraint_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <!-- AppBar with Toolbar -->
     <com.google.android.material.appbar.AppBarLayout
@@ -32,7 +33,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="8dp"
+
         app:menu="@menu/bottom_nav_menu" />
 
     <!-- Main Content Container -->
@@ -45,103 +46,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Navigation Buttons -->
-        <GridLayout
-            android:id="@+id/navigation_buttons"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:columnCount="4"
-            android:rowCount="3"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:padding="2dp"
-            android:layout_marginBottom="8dp">
-
-            <!-- Voltage Buttons -->
-            <Button
-                android:id="@+id/button_voltage_chart"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="2"
-                android:text="@string/voltage_chart" />
-
-            <Button
-                android:id="@+id/button_voltage_limit"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:text="@string/set_y_limit" />
-
-            <!-- Acceleration Buttons -->
-            <Button
-                android:id="@+id/button_acceleration_chart"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="2"
-                android:text="@string/acceleration_chart" />
-
-            <Button
-                android:id="@+id/button_acceleration_limit"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:text="@string/set_y_limit" />
-
-            <!-- RPM Buttons -->
-            <Button
-                android:id="@+id/button_rpm_chart"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="2"
-                android:text="@string/rpm_chart" />
-
-            <Button
-                android:id="@+id/button_rpm_limit"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:text="@string/set_y_limit" />
-
-            <!-- Current Buttons -->
-            <Button
-                android:id="@+id/button_current_chart"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="2"
-                android:text="@string/current_chart" />
-
-            <Button
-                android:id="@+id/button_current_limit"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:text="@string/set_y_limit" />
-
-            <Button
-                android:id="@+id/button_temperature_chart"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="2"
-                android:text="@string/temperature_chart" />
-
-            <Button
-                android:id="@+id/button_temperature_limit"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:text="@string/set_y_limit" />
-
-            <!-- Combined Chart Button -->
-            <Button
-                android:id="@+id/button_combined_chart"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="3"
-                android:text="@string/combined_charts"
-                android:layout_columnSpan="3" />
-        </GridLayout>
-
         <!-- Data Display -->
         <GridLayout
             android:id="@+id/data_display"
@@ -149,11 +53,10 @@
             android:layout_height="wrap_content"
             android:columnCount="2"
             android:rowCount="2"
-            app:layout_constraintTop_toBottomOf="@id/navigation_buttons"
+            app:layout_constraintTop_toBottomOf="@id/app_bar_layout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:padding="2dp"
-            android:layout_marginBottom="8dp">
+            android:padding="2dp">
 
             <TextView
                 android:id="@+id/text_voltage"
@@ -227,6 +130,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:fitsSystemWindows="true" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

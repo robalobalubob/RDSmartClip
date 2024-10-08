@@ -1,6 +1,7 @@
 package com.example.rdsmartclipper;
 
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -20,9 +21,15 @@ import com.github.mikephil.charting.data.LineDataSet;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * CombinedChartFragment class
+ */
 public class CombinedChartFragment extends Fragment {
 
-    private LineChart voltageChart, currentChart, accelerationChart, rpmChart;
+    private LineChart voltageChart;
+    private LineChart currentChart;
+    private LineChart accelerationChart;
+    private LineChart rpmChart;
     private SharedViewModel sharedViewModel;
 
     public CombinedChartFragment() {
@@ -44,22 +51,32 @@ public class CombinedChartFragment extends Fragment {
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
-        setupChart(voltageChart, "Voltage", sharedViewModel.getVoltageEntries(), sharedViewModel.getVoltageYLimit());
-        setupChart(currentChart, "Current", sharedViewModel.getCurrentEntries(), sharedViewModel.getCurrentYLimit());
-        setupChart(accelerationChart, "Acceleration", sharedViewModel.getAccelerationEntries(), sharedViewModel.getAccelerationYLimit());
-        setupChart(rpmChart, "RPM", sharedViewModel.getRPMEntries(), sharedViewModel.getRPMYLimit());
+        setupChart(voltageChart, "Voltage", sharedViewModel.getVoltageEntries(),
+                sharedViewModel.getVoltageLowerYLimit(), sharedViewModel.getVoltageUpperYLimit());
+
+        setupChart(currentChart, "Current", sharedViewModel.getCurrentEntries(),
+                sharedViewModel.getCurrentLowerYLimit(), sharedViewModel.getCurrentUpperYLimit());
+
+        setupChart(accelerationChart, "Acceleration", sharedViewModel.getAccelerationEntries(),
+                sharedViewModel.getAccelerationLowerYLimit(), sharedViewModel.getAccelerationUpperYLimit());
+
+        setupChart(rpmChart, "RPM", sharedViewModel.getRPMEntries(),
+                sharedViewModel.getRPMLowerYLimit(), sharedViewModel.getRPMUpperYLimit());
     }
 
-    private void setupChart(LineChart chart, String label, LiveData<List<Entry>> entriesLiveData, float yLimit) {
+    private void setupChart(LineChart chart, String label, LiveData<List<Entry>> entriesLiveData,
+                            LiveData<Float> lowerYLimitLiveData, LiveData<Float> upperYLimitLiveData) {
+
         LineDataSet dataSet = new LineDataSet(new ArrayList<>(), label);
         LineData lineData = new LineData(dataSet);
         chart.setData(lineData);
 
         // Configure chart appearance
-        YAxis leftAxis = chart.getAxisLeft();
-        leftAxis.setAxisMaximum(yLimit);
-        leftAxis.setAxisMinimum(0);
+        chart.getDescription().setEnabled(false);
         chart.getAxisRight().setEnabled(false);
+
+        // Apply initial Y-limits
+        updateYLimits(chart, lowerYLimitLiveData.getValue(), upperYLimitLiveData.getValue());
 
         // Observe data changes
         entriesLiveData.observe(getViewLifecycleOwner(), entries -> {
@@ -68,13 +85,17 @@ public class CombinedChartFragment extends Fragment {
             chart.notifyDataSetChanged();
             chart.invalidate();
         });
+
+        // Observe Y-Limit changes
+        lowerYLimitLiveData.observe(getViewLifecycleOwner(),
+                lowerLimit -> updateYLimits(chart, lowerLimit, upperYLimitLiveData.getValue()));
+
+        upperYLimitLiveData.observe(getViewLifecycleOwner(),
+                upperLimit -> updateYLimits(chart, lowerYLimitLiveData.getValue(), upperLimit));
     }
 
-    private void updateYLimits() {
-        Float lowerLimit = sharedViewModel.getVoltageLowerYLimit().getValue();
-        Float upperLimit = sharedViewModel.getVoltageUpperYLimit().getValue();
-
-        YAxis yAxis = voltageChart.getAxisLeft();
+    private void updateYLimits(LineChart chart, Float lowerLimit, Float upperLimit) {
+        YAxis yAxis = chart.getAxisLeft();
 
         if (lowerLimit != null) {
             yAxis.setAxisMinimum(lowerLimit);
@@ -88,7 +109,6 @@ public class CombinedChartFragment extends Fragment {
             yAxis.resetAxisMaximum();
         }
 
-        voltageChart.invalidate();
+        chart.invalidate();
     }
-}
 }

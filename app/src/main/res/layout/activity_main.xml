@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main_constraint_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <!-- AppBar with Toolbar -->
     <com.google.android.material.appbar.AppBarLayout
@@ -32,7 +33,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="8dp"
+
         app:menu="@menu/bottom_nav_menu" />
 
     <!-- Main Content Container -->
@@ -52,11 +53,10 @@
             android:layout_height="wrap_content"
             android:columnCount="2"
             android:rowCount="2"
-            app:layout_constraintTop_toBottomOf="@id/navigation_buttons"
+            app:layout_constraintTop_toBottomOf="@id/app_bar_layout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:padding="2dp"
-            android:layout_marginBottom="8dp">
+            android:padding="2dp">
 
             <TextView
                 android:id="@+id/text_voltage"
@@ -130,6 +130,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:fitsSystemWindows="true" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -17,6 +17,7 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,28 +26,21 @@ import java.util.List;
  * TemperatureChartFragment class
  */
 public class TemperatureChartFragment extends Fragment {
+
     private LineChart temperatureChart;
     private LineDataSet temperatureDataSet;
     private LineData temperatureLineData;
+    private SharedViewModel sharedViewModel;
 
     /**
      * Necessary empty Constructor
      */
     public TemperatureChartFragment() {
-
+        // Required empty public constructor
     }
 
     /**
      * Called to have the fragment instantiate its user interface view.
-     * @param inflater The LayoutInflater object that can be used to inflate
-     * any views in the fragment,
-     * @param container If non-null, this is the parent view that the fragment's
-     * UI should be attached to.  The fragment should not add the view itself,
-     * but this can be used to generate the LayoutParams of the view.
-     * @param savedInstanceState If non-null, this fragment is being re-constructed
-     * from a previous saved state as given here.
-     *
-     * @return Return the View for the fragment's UI, or null.
      */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -56,49 +50,75 @@ public class TemperatureChartFragment extends Fragment {
 
     /**
      * Formats the chart and prepares the display
-     * @param view The View returned by {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.
-     * @param savedInstanceState If non-null, this fragment is being re-constructed
-     * from a previous saved state as given here.
      */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        // Initialize the chart
         temperatureChart = view.findViewById(R.id.temperature_chart);
 
+        // Initialize the data
         temperatureDataSet = new LineDataSet(new ArrayList<>(), "Temperature");
         temperatureLineData = new LineData(temperatureDataSet);
         temperatureChart.setData(temperatureLineData);
 
-        SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
-        float yLimit = sharedViewModel.getTemperatureYLimit();
+        // Initialize the ViewModel
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
-        // Apply y-limit to the chart
-        YAxis leftAxis = temperatureChart.getAxisLeft();
-        leftAxis.setAxisMaximum(yLimit);
-        leftAxis.setAxisMinimum(0);  // Lower band set to 0
-        temperatureChart.getAxisRight().setEnabled(false); // Disable right axis
+        // Setup chart appearance and initial Y-limits
+        setupChart();
 
+        // Observe the LiveData and update the chart data
         sharedViewModel.getTemperatureEntries().observe(getViewLifecycleOwner(), this::updateChart);
 
-        boolean isFullscreen = getArguments() != null && getArguments().getBoolean("isFullscreen", false);
+        // Observe Y-Limits and update the chart accordingly
+        sharedViewModel.getTemperatureLowerYLimit().observe(getViewLifecycleOwner(),
+                lowerLimit -> updateYLimits());
 
-        AppCompatActivity activity = (AppCompatActivity) requireActivity();
-        if (activity.getSupportActionBar() != null) {
-            activity.getSupportActionBar().setTitle("Temperature Chart");
-            if (isFullscreen) {
-                activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        sharedViewModel.getTemperatureUpperYLimit().observe(getViewLifecycleOwner(),
+                upperLimit -> updateYLimits());
 
-                // Handle toolbar navigation click
-                Toolbar toolbar = activity.findViewById(R.id.toolbar);
-                toolbar.setNavigationOnClickListener(v -> activity.getOnBackPressedDispatcher().onBackPressed());
-            } else {
-                activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-            }
+        // Handle toolbar settings
+        handleToolbar();
+    }
+
+    /**
+     * Set up chart appearance and initial Y-axis limits
+     */
+    private void setupChart() {
+        // Customize chart appearance
+        temperatureChart.getDescription().setEnabled(false);
+        temperatureChart.getAxisRight().setEnabled(false); // Disable right axis
+
+        // Apply initial Y-limits
+        updateYLimits();
+    }
+
+    /**
+     * Updates the Y-axis limits of the chart based on ViewModel values
+     */
+    private void updateYLimits() {
+        Float lowerLimit = sharedViewModel.getTemperatureLowerYLimit().getValue();
+        Float upperLimit = sharedViewModel.getTemperatureUpperYLimit().getValue();
+
+        YAxis leftAxis = temperatureChart.getAxisLeft();
+
+        if (lowerLimit != null) {
+            leftAxis.setAxisMinimum(lowerLimit);
+        } else {
+            leftAxis.resetAxisMinimum();
         }
+
+        if (upperLimit != null) {
+            leftAxis.setAxisMaximum(upperLimit);
+        } else {
+            leftAxis.resetAxisMaximum();
+        }
+
+        temperatureChart.invalidate();
     }
 
     /**
      * Updates the chart with new data
-     * @param entries List of entries to add to the chart
      */
     private void updateChart(List<Entry> entries) {
         temperatureDataSet.setValues(entries);
@@ -108,20 +128,47 @@ public class TemperatureChartFragment extends Fragment {
     }
 
     /**
+     * Handles the toolbar settings based on fullscreen mode
+     */
+    private void handleToolbar() {
+        boolean isFullscreen = getArguments() != null && getArguments().getBoolean("isFullscreen", false);
+
+        AppCompatActivity activity = (AppCompatActivity) requireActivity();
+        Toolbar toolbar = activity.findViewById(R.id.toolbar);
+        BottomNavigationView bottomNavigationView = activity.findViewById(R.id.bottom_navigation);
+
+        if (activity.getSupportActionBar() != null) {
+            activity.getSupportActionBar().setTitle("Temperature Chart");
+
+            if (isFullscreen) {
+                activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                toolbar.setNavigationOnClickListener(v -> activity.getOnBackPressedDispatcher().onBackPressed());
+                bottomNavigationView.setVisibility(View.GONE);
+            } else {
+                activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                toolbar.setNavigationOnClickListener(null);
+            }
+        }
+    }
+
+    /**
      * Called when the fragment is no longer in use.
      */
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+
         // Reset toolbar
         AppCompatActivity activity = (AppCompatActivity) requireActivity();
+        Toolbar toolbar = activity.findViewById(R.id.toolbar);
+
+        BottomNavigationView bottomNavigationView = activity.findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setVisibility(View.VISIBLE);
+
         if (activity.getSupportActionBar() != null) {
             activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             activity.getSupportActionBar().setTitle("SmartClip");
+            toolbar.setNavigationOnClickListener(null);
         }
-
-        // Remove navigation click listener
-        Toolbar toolbar = activity.findViewById(R.id.toolbar);
-        toolbar.setNavigationOnClickListener(null);
     }
 }
