@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:autofillHints=""
-        android:hint="Lower Limit"
+        android:hint="@string/lower_limit"
         android:inputType="numberDecimal" />
 
     <EditText
@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:autofillHints=""
-        android:hint="Upper Limit"
+        android:hint="@string/upper_limit"
         android:inputType="numberDecimal" />
 
 </LinearLayout>

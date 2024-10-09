@@ -17,4 +17,6 @@
     <string name="charts">Charts</string>
     <string name="combined_chart">Combined Chart</string>
     <string name="_3d_model">3D Model</string>
+    <string name="lower_limit">Lower Limit</string>
+    <string name="upper_limit">Upper Limit</string>
 </resources>
