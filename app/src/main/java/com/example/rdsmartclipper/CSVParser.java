@@ -12,6 +12,7 @@ import java.util.List;
 public class CSVParser {
     /**
      * Parses CSV data into a list of DataPoint objects
+     *
      * @param data String of CSV data to be parsed
      * @return List of DataPoint objects
      */
@@ -47,7 +48,7 @@ public class CSVParser {
                 dataPoints.add(new DataPoint(voltage, temperature, rpm, current,
                         roll, pitch, yaw, acceleration, time));
             } else {
-                    System.err.println("Invalid row format: " + row);
+                System.err.println("Invalid row format: " + row);
             }
         }
         return dataPoints;

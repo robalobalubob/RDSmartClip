@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <SwitchPreferenceCompat
+        android:defaultValue="false"
         android:key="debug_mode"
-        android:title="Debug Mode"
-        android:defaultValue="false" />
+        android:title="Debug Mode" />
 
     <SwitchPreferenceCompat
-        android:key="fullscreen_mode"
-        android:title="Fullscreen Mode"
         android:defaultValue="true"
-        android:summary="Enable or disable fullscreen mode for charts" />
+        android:key="fullscreen_mode"
+        android:summary="Enable or disable fullscreen mode for charts"
+        android:title="Fullscreen Mode" />
 </PreferenceScreen>

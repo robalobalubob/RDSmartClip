@@ -28,26 +28,13 @@ import java.util.concurrent.Executors;
 public class BluetoothService extends Service {
 
     private static final String TAG = "BluetoothService";
-
+    private final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+    private final IBinder binder = new LocalBinder();
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothSocket bluetoothSocket;
     private InputStream inputStream;
-    private final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-
     private BluetoothDataCallback bluetoothDataCallback;
     private ExecutorService executorService;
-
-    private final IBinder binder = new LocalBinder();
-
-    public class LocalBinder extends Binder {
-        public BluetoothService getService() {
-            return BluetoothService.this;
-        }
-    }
-
-    public interface BluetoothDataCallback {
-        void onBluetoothDataReceived(String data);
-    }
 
     @Override
     public void onCreate() {
@@ -74,6 +61,9 @@ public class BluetoothService extends Service {
 
         // Check permissions
         if (checkBluetoothPermissions()) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                return devices;
+            }
             Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
             for (BluetoothDevice device : pairedDevices) {
                 devices.add(device.getName() + " - " + device.getAddress());
@@ -85,7 +75,6 @@ public class BluetoothService extends Service {
 
         return devices;
     }
-
 
     @SuppressLint("MissingPermission")
     public void connectToDevice(String macAddress) {
@@ -155,5 +144,15 @@ public class BluetoothService extends Service {
         super.onDestroy();
         closeResources();
         executorService.shutdown();
+    }
+
+    public interface BluetoothDataCallback {
+        void onBluetoothDataReceived(String data);
+    }
+
+    public class LocalBinder extends Binder {
+        public BluetoothService getService() {
+            return BluetoothService.this;
+        }
     }
 }

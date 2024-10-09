@@ -2,36 +2,35 @@ package com.example.rdsmartclipper;
 
 import android.Manifest;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.content.Context;
 import android.os.IBinder;
 import android.util.Log;
-
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-
-import androidx.activity.OnBackPressedCallback;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.app.ActivityCompat;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.preference.PreferenceManager;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.preference.PreferenceManager;
+
+import com.example.rdsmartclipper.databinding.ActivityMainBinding;
 import com.github.mikephil.charting.data.Entry;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -40,45 +39,20 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Locale;
 
-import com.example.rdsmartclipper.databinding.ActivityMainBinding;
-
 /**
  * MainActivity
  * Creates and initializes the main view of the application.
  */
 public class MainActivity extends AppCompatActivity implements BluetoothService.BluetoothDataCallback {
 
-    private ActivityMainBinding binding;
-
-    // Replace myBluetoothManager with BluetoothService
-    private BluetoothService bluetoothService;
-    private boolean isServiceBound = false;
-    private SharedViewModel sharedViewModel;
-
-    private TextView textVoltage;
-    private TextView textCurrent;
-    private TextView textTemperature;
-    private TextView textRPM;
-    private TextView textAcceleration;
-
-    // Default text, updated with new data
-    private String voltageText = "Voltage: N/A";
-    private String currentText = "Current: N/A";
-    private String temperatureText = "Temperature: N/A";
-    private String rpmText = "RPM: N/A";
-    private String accelerationText = "Acceleration: N/A";
-
     // Key strings
     private static final String DEBUG_MODE_KEY = "debug_mode";
     private static final String FULLSCREEN_MODE_KEY = "fullscreen_mode";
-
-    // Mode checks
-    private boolean isDebugMode = false;
-    private boolean isFullscreenMode = true;
-    private boolean lastKnownFullscreenMode = true;
-
     private static final int REQUEST_BLUETOOTH_PERMISSIONS = 1;
-
+    private ActivityMainBinding binding;
+    // Replace myBluetoothManager with BluetoothService
+    private BluetoothService bluetoothService;
+    private boolean isServiceBound = false;
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -99,12 +73,43 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
             bluetoothService = null;
         }
     };
+    private SharedViewModel sharedViewModel;
+    private TextView textVoltage;
+    private TextView textCurrent;
+    private TextView textTemperature;
+    private TextView textRPM;
+    private TextView textAcceleration;
+    // Default text, updated with new data
+    private String voltageText = "Voltage: N/A";
+    private String currentText = "Current: N/A";
+    private String temperatureText = "Temperature: N/A";
+    private String rpmText = "RPM: N/A";
+    private String accelerationText = "Acceleration: N/A";
+    // Mode checks
+    private boolean isDebugMode = false;
+    private boolean isFullscreenMode = true;
+    /**
+     * Handles when preferences change
+     */
+    private final SharedPreferences.OnSharedPreferenceChangeListener prefListener = (sharedPreferences, key) -> {
+        if (DEBUG_MODE_KEY.equals(key)) {
+            // Update mode
+            isDebugMode = sharedPreferences.getBoolean(DEBUG_MODE_KEY, false);
+            // Handle mode change
+            handleModeChange();
+        } else if (FULLSCREEN_MODE_KEY.equals(key)) {
+            // Update fullscreen mode
+            isFullscreenMode = sharedPreferences.getBoolean(FULLSCREEN_MODE_KEY, true);
+
+            Toast.makeText(this, "Fullscreen mode will apply the next time you open a chart.", Toast.LENGTH_SHORT).show();
+        }
+    };
+    private boolean lastKnownFullscreenMode = true;
 
     /**
      * @param savedInstanceState If the activity is being re-initialized after
-     *     previously being shut down then this Bundle contains the data it most
-     *     recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
-     *
+     *                           previously being shut down then this Bundle contains the data it most
+     *                           recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,8 +146,12 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
                 openFragment(new ChartsFragment(), isFullscreenMode);
                 return true;
             } else if (itemId == R.id.navigation_combined_chart) {
-                // Open AccelerationChartFragment
+                // Open Combined Chart
                 openFragment(new CombinedChartFragment(), isFullscreenMode);
+                return true;
+            } else if (itemId == R.id.navigation_3d_model) {
+                // Open 3D Model
+                openFragment(new OpenGLFragment(), isFullscreenMode);
                 return true;
             } else if (itemId == R.id.navigation_settings) {
                 // Navigate to settings
@@ -192,7 +201,6 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
         }
     }
 
-
     private void startAndBindBluetoothService() {
         Intent intent = new Intent(this, BluetoothService.class);
         startService(intent);
@@ -220,15 +228,15 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
 
     /**
      * Handles the result of permission requests.
-     * @param requestCode The request code passed
-     * @param permissions The requested permissions. Never null.
-     * @param grantResults The grant results for the corresponding permissions
-     *     which is either {@link android.content.pm.PackageManager#PERMISSION_GRANTED}
-     *     or {@link android.content.pm.PackageManager#PERMISSION_DENIED}. Never null.
      *
+     * @param requestCode  The request code passed
+     * @param permissions  The requested permissions. Never null.
+     * @param grantResults The grant results for the corresponding permissions
+     *                     which is either {@link android.content.pm.PackageManager#PERMISSION_GRANTED}
+     *                     or {@link android.content.pm.PackageManager#PERMISSION_DENIED}. Never null.
      */
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_BLUETOOTH_PERMISSIONS) {
             boolean permissionsGranted = true;
@@ -246,7 +254,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
 
     /**
      * Opens a fragment chart in either fullscreen or non-fullscreen mode.
-     * @param fragment Fragment to be opened, one of the chart options
+     *
+     * @param fragment   Fragment to be opened, one of the chart options
      * @param fullscreen Whether or not the fragment is opened in fullscreen
      */
     public void openFragment(Fragment fragment, Boolean fullscreen) {
@@ -275,23 +284,6 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
 
         updateToolbarNavigationIcon();
     }
-
-    /**
-     * Handles when preferences change
-     */
-    private final SharedPreferences.OnSharedPreferenceChangeListener prefListener = (sharedPreferences, key) -> {
-        if (DEBUG_MODE_KEY.equals(key)) {
-            // Update mode
-            isDebugMode = sharedPreferences.getBoolean(DEBUG_MODE_KEY, false);
-            // Handle mode change
-            handleModeChange();
-        } else if (FULLSCREEN_MODE_KEY.equals(key)) {
-            // Update fullscreen mode
-            isFullscreenMode = sharedPreferences.getBoolean(FULLSCREEN_MODE_KEY, true);
-
-            Toast.makeText(this, "Fullscreen mode will apply the next time you open a chart.", Toast.LENGTH_SHORT).show();
-        }
-    };
 
     /**
      * Updates the text elements with the latest data from the ViewModel
@@ -359,6 +351,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
 
     /**
      * Updates the text element with the latest voltage data.
+     *
      * @param voltage Voltage to update text to
      */
     private void updateVoltageText(float voltage) {
@@ -368,6 +361,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
 
     /**
      * Updates the text element with the latest current data.
+     *
      * @param current Current to update text to
      */
     private void updateCurrentText(float current) {
@@ -377,6 +371,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
 
     /**
      * Updates the text element with the latest temperature data.
+     *
      * @param temperature Temperature to update text to
      */
     private void updateTemperatureText(float temperature) {
@@ -386,6 +381,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
 
     /**
      * Updates the text element with the latest RPM data.
+     *
      * @param rpm RPM to update text to
      */
     private void updateRPMText(float rpm) {
@@ -433,12 +429,14 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
         currentText = "Current: N/A";
         temperatureText = "Temperature: N/A";
         rpmText = "RPM: N/A";
+        accelerationText = "Acceleration: N/A";
 
         // Update TextViews
         textVoltage.setText(voltageText);
         textCurrent.setText(currentText);
         textTemperature.setText(temperatureText);
         textRPM.setText(rpmText);
+        textAcceleration.setText(accelerationText);
     }
 
     /**
@@ -453,17 +451,22 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
                 String line;
                 while ((line = reader.readLine()) != null) {
                     // Simulate real-time data by adding a delay
+                    //noinspection BusyWait
+                    Thread.sleep(1500);
                     parseCSVData(line);
                 }
             } catch (IOException e) {
                 Log.e("MainActivity", "Failed to read data file.", e);
                 runOnUiThread(() -> Toast.makeText(this, "Failed to read data file.", Toast.LENGTH_SHORT).show());
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         }).start();
     }
 
     /**
      * Parses the CSV data and adds it to the ViewModel.
+     *
      * @param data Data to be added to the ViewModel
      */
     private void parseCSVData(String data) {
@@ -568,6 +571,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
 
     /**
      * Called when data is received from the BluetoothService.
+     *
      * @param data Data received from the BluetoothService
      */
     @Override
@@ -602,8 +606,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
 
     /**
      * Displays options menu
-     * @param menu The options menu in which you place your items.
      *
+     * @param menu The options menu in which you place your items.
      * @return True if the menu is displayed. Always true
      */
     @Override
@@ -615,8 +619,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
 
     /**
      * Called when an item in the options menu is selected.
-     * @param item The menu item that was selected.
      *
+     * @param item The menu item that was selected.
      * @return True
      */
     @Override

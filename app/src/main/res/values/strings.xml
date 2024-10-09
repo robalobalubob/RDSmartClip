@@ -1,29 +1,7 @@
 <resources>
     <string name="app_name">R&amp;D Smart Clipper</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
-    <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Settings</string>
 
-    <string name="menu_transform">Transform</string>
-    <string name="menu_reflow">Reflow</string>
-    <string name="menu_slideshow">Slideshow</string>
-    <string name="menu_settings">Settings</string>
-
-    <string name="lorem_ipsum_title">Lorem Ipsum"</string>
-    <string name="lorem_ipsum">Lorem Ipsum is simply placeholder text of the printing and
-        typesetting industry. Lorem Ipsum has been the industry\'s standard placeholder text ever
-        since the 1500s, when an unknown printer took a galley of type and scrambled it to make a
-        type specimen book"
-    </string>
-    <string name="fab_content_description">Represents a view to invoke an action</string>
-    <string name="image_view_item_transform_content_description">Represents an image view in the
-        item
-    </string>
     <string name="settings">Settings</string>
-    <string name="title_activity_voltage_chart">VoltageChartActivity</string>
     <string name="voltage_chart">Voltage Chart</string>
     <string name="temperature_chart">Temperature Chart</string>
     <string name="rpm_chart">RPM Chart</string>
@@ -34,6 +12,9 @@
     <string name="temperature_n_a">Temperature: N/A</string>
     <string name="rpm_n_a">RPM: N/A</string>
     <string name="acceleration_chart">Acceleration Chart</string>
-    <string name="combined_charts">Combined Chart</string>
     <string name="acceleration_n_a">Acceleration: N/A</string>
+    <string name="home">Home</string>
+    <string name="charts">Charts</string>
+    <string name="combined_chart">Combined Chart</string>
+    <string name="_3d_model">3D Model</string>
 </resources>

@@ -1,16 +1,15 @@
 package com.example.rdsmartclipper;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
-
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.YAxis;
@@ -26,12 +25,6 @@ import java.util.List;
  */
 public class CombinedChartFragment extends Fragment {
 
-    private LineChart voltageChart;
-    private LineChart currentChart;
-    private LineChart accelerationChart;
-    private LineChart rpmChart;
-    private SharedViewModel sharedViewModel;
-
     public CombinedChartFragment() {
         // Required empty public constructor
     }
@@ -44,12 +37,12 @@ public class CombinedChartFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        voltageChart = view.findViewById(R.id.voltage_chart);
-        currentChart = view.findViewById(R.id.current_chart);
-        accelerationChart = view.findViewById(R.id.acceleration_chart);
-        rpmChart = view.findViewById(R.id.rpm_chart);
+        LineChart voltageChart = view.findViewById(R.id.voltage_chart);
+        LineChart currentChart = view.findViewById(R.id.current_chart);
+        LineChart accelerationChart = view.findViewById(R.id.acceleration_chart);
+        LineChart rpmChart = view.findViewById(R.id.rpm_chart);
 
-        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
         setupChart(voltageChart, "Voltage", sharedViewModel.getVoltageEntries(),
                 sharedViewModel.getVoltageLowerYLimit(), sharedViewModel.getVoltageUpperYLimit());

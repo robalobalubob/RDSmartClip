@@ -46,12 +46,12 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/INDEX.LIST"
         }
     }
 }
 
 dependencies {
-
     implementation(libs.mpandroidchart)
     implementation(libs.appcompat)
     implementation(libs.material)

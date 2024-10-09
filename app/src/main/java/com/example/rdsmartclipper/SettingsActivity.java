@@ -16,10 +16,10 @@ public class SettingsActivity extends AppCompatActivity {
 
     /**
      * Sets up preferences to be displayed
-     * @param savedInstanceState If the activity is being re-initialized after
-     *     previously being shut down then this Bundle contains the data it most
-     *     recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
      *
+     * @param savedInstanceState If the activity is being re-initialized after
+     *                           previously being shut down then this Bundle contains the data it most
+     *                           recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,8 +38,8 @@ public class SettingsActivity extends AppCompatActivity {
 
     /**
      * Handles the back button press
-     * @param item The menu item that was selected.
      *
+     * @param item The menu item that was selected.
      * @return true if the action was handled, false otherwise
      */
     @Override
