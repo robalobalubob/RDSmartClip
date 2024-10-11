@@ -31,7 +31,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-
         app:menu="@menu/bottom_nav_menu" />
 
     <!-- Main Content Container -->
@@ -45,77 +44,259 @@
         app:layout_constraintTop_toBottomOf="@id/app_bar_layout">
 
         <!-- Data Display -->
-        <GridLayout
-            android:id="@+id/data_display"
+        <TableLayout
+            android:id="@+id/data_table"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:columnCount="2"
-            android:padding="2dp"
-            android:rowCount="2"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:padding="8dp"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintEnd_toEndOf="parent">
 
-            <TextView
-                android:id="@+id/text_voltage"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:padding="2dp"
-                android:text="@string/voltage_n_a"
-                android:textAlignment="center"
-                android:textSize="16sp" />
+            <!-- Table Header -->
+            <TableRow>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/parameter"
+                    android:textStyle="bold"
+                    android:padding="4dp" />
 
-            <TextView
-                android:id="@+id/text_current"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:padding="2dp"
-                android:text="@string/current_n_a"
-                android:textAlignment="center"
-                android:textSize="16sp" />
+                <TextView
+                    android:id="@+id/header_current"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/current"
+                    android:textStyle="bold"
+                    android:padding="4dp" />
 
-            <TextView
-                android:id="@+id/text_acceleration"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:padding="2dp"
-                android:text="@string/acceleration_n_a"
-                android:textAlignment="center"
-                android:textSize="16sp" />
+                <TextView
+                    android:id="@+id/header_min"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/min"
+                    android:textStyle="bold"
+                    android:padding="4dp" />
 
-            <TextView
-                android:id="@+id/text_rpm"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:padding="2dp"
-                android:text="@string/rpm_n_a"
-                android:textAlignment="center"
-                android:textSize="16sp" />
+                <TextView
+                    android:id="@+id/header_max"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/max"
+                    android:textStyle="bold"
+                    android:padding="4dp" />
 
-            <TextView
-                android:id="@+id/text_temperature"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:padding="2dp"
-                android:text="@string/temperature_n_a"
-                android:textAlignment="center"
-                android:textSize="16sp" />
-        </GridLayout>
+                <TextView
+                    android:id="@+id/header_avg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/average"
+                    android:textStyle="bold"
+                    android:padding="4dp" />
+            </TableRow>
+
+            <!-- Voltage Row -->
+            <TableRow>
+                <TextView
+                    android:id="@+id/label_voltage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/voltage"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/text_voltage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/n_a"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/text_voltage_min"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/n_a"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/text_voltage_max"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/n_a"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/text_voltage_avg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/n_a"
+                    android:padding="4dp" />
+            </TableRow>
+
+            <!-- Current Row -->
+            <!-- Repeat similar blocks for Current, Temperature, RPM, Acceleration -->
+            <TableRow>
+                <TextView
+                    android:id="@+id/label_current"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/current"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/text_current"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/n_a"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/text_current_min"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/n_a"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/text_current_max"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/n_a"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/text_current_avg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/n_a"
+                    android:padding="4dp" />
+            </TableRow>
+
+            <!-- Temperature Row -->
+            <TableRow>
+                <TextView
+                    android:id="@+id/label_temperature"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/temperature"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/text_temperature"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/n_a"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/text_temperature_min"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/n_a"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/text_temperature_max"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/n_a"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/text_temperature_avg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/n_a"
+                    android:padding="4dp" />
+            </TableRow>
+
+            <!-- RPM Row -->
+            <TableRow>
+                <TextView
+                    android:id="@+id/label_rpm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/rpm"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/text_rpm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/n_a"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/text_rpm_min"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/n_a"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/text_rpm_max"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/n_a"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/text_rpm_avg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/n_a"
+                    android:padding="4dp" />
+            </TableRow>
+
+            <!-- Acceleration Row -->
+            <TableRow>
+                <TextView
+                    android:id="@+id/label_acceleration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/acceleration"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/text_acceleration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/n_a"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/text_acceleration_min"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/n_a"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/text_acceleration_max"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/n_a"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/text_acceleration_avg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/n_a"
+                    android:padding="4dp" />
+            </TableRow>
+
+        </TableLayout>
 
         <!-- Fragment Container -->
         <FrameLayout
             android:id="@+id/fragment_container"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            app:layout_constraintTop_toBottomOf="@+id/data_table"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/data_display" />
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

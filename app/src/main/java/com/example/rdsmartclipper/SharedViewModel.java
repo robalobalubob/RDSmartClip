@@ -8,18 +8,13 @@ import androidx.lifecycle.ViewModel;
 
 import com.github.mikephil.charting.data.Entry;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * SharedViewModel manages shared data between different components of the app.
  */
 public class SharedViewModel extends ViewModel {
-
-    // Maximum number of entries to keep
-    private static final int MAX_ENTRIES = 10000;
 
     // Map to hold ChartData for different types
     private final Map<String, ChartData> chartDataMap = new HashMap<>();
@@ -60,6 +55,7 @@ public class SharedViewModel extends ViewModel {
     public void addEntry(String chartType, Entry entry) {
         ChartData chartData = chartDataMap.get(chartType);
         if (chartData != null) {
+            entry.setData(chartType); // Set the data label for the entry
             chartData.addEntry(entry);
         }
     }

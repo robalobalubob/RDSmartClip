@@ -1,5 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
-<android.opengl.GLSurfaceView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/gl_surface_view"
+<!-- res/layout/fragment_opengl.xml -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/opengl_fragment"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" />
+    android:layout_height="match_parent">
+
+    <com.example.rdsmartclipper.MyGLSurfaceView
+        android:id="@+id/gl_surface_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Overlay UI elements can be added here -->
+    <!-- For example, a TextView or Button -->
+
+</FrameLayout>

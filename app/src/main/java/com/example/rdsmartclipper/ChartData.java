@@ -12,7 +12,7 @@ import java.util.List;
  * ChartData encapsulates the data and Y-axis limits for a chart.
  */
 public class ChartData {
-    private static final int MAX_ENTRIES = 10000; // Maximum number of entries to keep
+    private static final int MAX_ENTRIES = 1000; // Maximum number of entries to keep
 
     private final MutableLiveData<List<Entry>> entries = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<Float> lowerYLimit = new MutableLiveData<>();

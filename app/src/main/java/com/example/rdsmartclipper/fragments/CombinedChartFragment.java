@@ -13,13 +13,14 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.rdsmartclipper.ChartData;
+import com.example.rdsmartclipper.CustomMarkerView;
 import com.example.rdsmartclipper.R;
 import com.example.rdsmartclipper.SharedViewModel;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 
 import java.util.ArrayList;
 
@@ -68,6 +69,8 @@ public class CombinedChartFragment extends Fragment {
         dataSet.setDrawCircles(false);
         dataSet.setDrawValues(false);
 
+        dataSet.setLabel(chartType);
+
         LineData lineData = new LineData(dataSet);
         chart.setData(lineData);
 
@@ -75,6 +78,19 @@ public class CombinedChartFragment extends Fragment {
         chart.getDescription().setEnabled(false);
         chart.getAxisRight().setEnabled(false);
         chart.getLegend().setEnabled(false);
+
+        // Enable touch interactions
+        chart.setTouchEnabled(true);
+        chart.setHighlightPerTapEnabled(true);
+        chart.setHighlightPerDragEnabled(true);
+        chart.setDragEnabled(true);
+        chart.setScaleEnabled(true);
+        chart.setPinchZoom(true);
+
+        // Set the custom MarkerView
+        CustomMarkerView markerView = new CustomMarkerView(getContext());
+        markerView.setChartView(chart);
+        chart.setMarker(markerView);
 
         // Apply initial Y-limits
         updateYLimits(chart, chartData.getLowerYLimit().getValue(), chartData.getUpperYLimit().getValue());
@@ -116,19 +132,19 @@ public class CombinedChartFragment extends Fragment {
     }
 
     private void handleToolbar() {
-        boolean isFullscreen = getArguments() != null && getArguments().getBoolean("isFullscreen", false);
-
         AppCompatActivity activity = (AppCompatActivity) requireActivity();
         Toolbar toolbar = activity.findViewById(R.id.toolbar);
-        BottomNavigationView bottomNavigationView = activity.findViewById(R.id.bottom_navigation);
 
         if (activity.getSupportActionBar() != null) {
             activity.getSupportActionBar().setTitle("Combined Chart");
 
+            // Display the back arrow
             activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+            // Handle back arrow click
             toolbar.setNavigationOnClickListener(v -> {
-                // Navigate back when the back arrow is clicked
-                activity.getOnBackPressedDispatcher().onBackPressed();
+                // Navigate back to MainActivity
+                activity.getSupportFragmentManager().popBackStack();
             });
         }
     }
@@ -140,15 +156,11 @@ public class CombinedChartFragment extends Fragment {
         // Reset toolbar to default state
         AppCompatActivity activity = (AppCompatActivity) requireActivity();
         Toolbar toolbar = activity.findViewById(R.id.toolbar);
-        BottomNavigationView bottomNavigationView = activity.findViewById(R.id.bottom_navigation);
 
         if (activity.getSupportActionBar() != null) {
             activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             activity.getSupportActionBar().setTitle("SmartClip");
             toolbar.setNavigationOnClickListener(null);
         }
-
-        bottomNavigationView.setVisibility(View.VISIBLE);
     }
-
 }

@@ -58,18 +58,12 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
     private boolean isServiceBound = false;
     private SharedViewModel sharedViewModel;
 
-    private TextView textVoltage;
-    private TextView textCurrent;
-    private TextView textTemperature;
-    private TextView textRPM;
-    private TextView textAcceleration;
-
-    // Default text, updated with new data
-    private String voltageText = "Voltage: N/A";
-    private String currentText = "Current: N/A";
-    private String temperatureText = "Temperature: N/A";
-    private String rpmText = "RPM: N/A";
-    private String accelerationText = "Acceleration: N/A";
+    // TextViews for parameters
+    private TextView textVoltage, textVoltageMin, textVoltageMax, textVoltageAvg;
+    private TextView textCurrent, textCurrentMin, textCurrentMax, textCurrentAvg;
+    private TextView textTemperature, textTemperatureMin, textTemperatureMax, textTemperatureAvg;
+    private TextView textRPM, textRPMMin, textRPMMax, textRPMAvg;
+    private TextView textAcceleration, textAccelerationMin, textAccelerationMax, textAccelerationAvg;
 
     // Mode checks
     private boolean isDebugMode = false;
@@ -150,12 +144,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
         BottomNavigationView bottomNavigationView = binding.bottomNavigation;
         setupBottomNavigation(bottomNavigationView);
 
-        // Create text elements
-        textVoltage = binding.textVoltage;
-        textCurrent = binding.textCurrent;
-        textTemperature = binding.textTemperature;
-        textRPM = binding.textRpm;
-        textAcceleration = binding.textAcceleration;
+        // Initialize TextViews
+        initializeTextViews();
 
         // Observe data for changes
         observeData();
@@ -171,6 +161,41 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
             Log.d("MainActivity", "App is in debug mode, reading data from file");
             readDataFromFile();
         }
+    }
+
+    /**
+     * Initializes the TextViews for displaying data.
+     */
+    private void initializeTextViews() {
+        // Voltage TextViews
+        textVoltage = binding.textVoltage;
+        textVoltageMin = binding.textVoltageMin;
+        textVoltageMax = binding.textVoltageMax;
+        textVoltageAvg = binding.textVoltageAvg;
+
+        // Current TextViews
+        textCurrent = binding.textCurrent;
+        textCurrentMin = binding.textCurrentMin;
+        textCurrentMax = binding.textCurrentMax;
+        textCurrentAvg = binding.textCurrentAvg;
+
+        // Temperature TextViews
+        textTemperature = binding.textTemperature;
+        textTemperatureMin = binding.textTemperatureMin;
+        textTemperatureMax = binding.textTemperatureMax;
+        textTemperatureAvg = binding.textTemperatureAvg;
+
+        // RPM TextViews
+        textRPM = binding.textRpm;
+        textRPMMin = binding.textRpmMin;
+        textRPMMax = binding.textRpmMax;
+        textRPMAvg = binding.textRpmAvg;
+
+        // Acceleration TextViews
+        textAcceleration = binding.textAcceleration;
+        textAccelerationMin = binding.textAccelerationMin;
+        textAccelerationMax = binding.textAccelerationMax;
+        textAccelerationAvg = binding.textAccelerationAvg;
     }
 
     /**
@@ -314,121 +339,99 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
         fragmentTransaction.commit();
 
         updateToolbarNavigationIcon();
+        updateBottomNavigationSelection(fragmentTag);
+    }
+
+    /**
+     * Updates the toolbar navigation icon based on the back stack.
+     */
+    private void updateToolbarNavigationIcon() {
+        int backStackEntryCount = getSupportFragmentManager().getBackStackEntryCount();
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(backStackEntryCount > 0);
+        }
+    }
+
+    private void updateBottomNavigationSelection(String fragmentTag) {
+        switch (fragmentTag) {
+            case "HomeFragment":
+                binding.bottomNavigation.setSelectedItemId(R.id.navigation_home);
+                break;
+            case "ChartsFragment":
+                binding.bottomNavigation.setSelectedItemId(R.id.navigation_charts);
+                break;
+            case "CombinedChartFragment":
+                binding.bottomNavigation.setSelectedItemId(R.id.navigation_combined_chart);
+                break;
+            case "OpenGLFragment":
+                binding.bottomNavigation.setSelectedItemId(R.id.navigation_3d_model);
+                break;
+            case "SettingsFragment":
+                binding.bottomNavigation.setSelectedItemId(R.id.navigation_settings);
+                break;
+            default:
+                // Deselect all if the fragment is not associated with a bottom navigation item
+                binding.bottomNavigation.getMenu().setGroupCheckable(0, false, true);
+                break;
+        }
     }
 
     /**
      * Updates the text elements with the latest data from the ViewModel.
      */
     private void observeData() {
-        // Observer for Voltage
-        sharedViewModel.getChartData("Voltage").getEntries().observe(this, entries -> {
-            if (entries != null && !entries.isEmpty()) {
-                Entry latestEntry = entries.get(entries.size() - 1);
-                float voltage = latestEntry.getY();
-                updateVoltageText(voltage);
-            } else {
-                voltageText = "Voltage: N/A";
-                textVoltage.setText(voltageText);
-            }
-        });
-
-        // Observer for Current
-        sharedViewModel.getChartData("Current").getEntries().observe(this, entries -> {
-            if (entries != null && !entries.isEmpty()) {
-                Entry latestEntry = entries.get(entries.size() - 1);
-                float current = latestEntry.getY();
-                updateCurrentText(current);
-            } else {
-                currentText = "Current: N/A";
-                textCurrent.setText(currentText);
-            }
-        });
-
-        // Observer for Temperature
-        sharedViewModel.getChartData("Temperature").getEntries().observe(this, entries -> {
-            if (entries != null && !entries.isEmpty()) {
-                Entry latestEntry = entries.get(entries.size() - 1);
-                float temperature = latestEntry.getY();
-                updateTemperatureText(temperature);
-            } else {
-                temperatureText = "Temperature: N/A";
-                textTemperature.setText(temperatureText);
-            }
-        });
-
-        // Observer for RPM
-        sharedViewModel.getChartData("RPM").getEntries().observe(this, entries -> {
-            if (entries != null && !entries.isEmpty()) {
-                Entry latestEntry = entries.get(entries.size() - 1);
-                float rpm = latestEntry.getY();
-                updateRPMText(rpm);
-            } else {
-                rpmText = "RPM: N/A";
-                textRPM.setText(rpmText);
-            }
-        });
-
-        // Observer for Acceleration
-        sharedViewModel.getChartData("Acceleration").getEntries().observe(this, entries -> {
-            if (entries != null && !entries.isEmpty()) {
-                Entry latestEntry = entries.get(entries.size() - 1);
-                float acceleration = latestEntry.getY();
-                updateAccelerationText(acceleration);
-            } else {
-                accelerationText = "Acceleration: N/A";
-                textAcceleration.setText(accelerationText);
-            }
-        });
+        observeParameter("Voltage", textVoltage, textVoltageMin, textVoltageMax, textVoltageAvg, "V", "%.2f");
+        observeParameter("Current", textCurrent, textCurrentMin, textCurrentMax, textCurrentAvg, "A", "%.2f");
+        observeParameter("Temperature", textTemperature, textTemperatureMin, textTemperatureMax, textTemperatureAvg, "°C", "%.2f");
+        observeParameter("RPM", textRPM, textRPMMin, textRPMMax, textRPMAvg, "", "%.0f");
+        observeParameter("Acceleration", textAcceleration, textAccelerationMin, textAccelerationMax, textAccelerationAvg, "m/s²", "%.2f");
     }
 
     /**
-     * Updates the text element with the latest voltage data.
+     * Observes a parameter and updates its TextViews.
      *
-     * @param voltage Voltage to update text to.
+     * @param parameterName  Name of the parameter.
+     * @param latestTextView TextView for the latest value.
+     * @param minTextView    TextView for the minimum value.
+     * @param maxTextView    TextView for the maximum value.
+     * @param avgTextView    TextView for the average value.
+     * @param unit           Unit of measurement.
+     * @param valueFormat    Format string for the values.
      */
-    private void updateVoltageText(float voltage) {
-        voltageText = String.format(Locale.getDefault(), "Voltage: %.2f V", voltage);
-        textVoltage.setText(voltageText);
-    }
+    private void observeParameter(String parameterName, TextView latestTextView, TextView minTextView, TextView maxTextView, TextView avgTextView, String unit, String valueFormat) {
+        sharedViewModel.getChartData(parameterName).getEntries().observe(this, entries -> {
+            if (entries != null && !entries.isEmpty()) {
+                Entry latestEntry = entries.get(entries.size() - 1);
+                float latestValue = latestEntry.getY();
 
-    /**
-     * Updates the text element with the latest current data.
-     *
-     * @param current Current to update text to.
-     */
-    private void updateCurrentText(float current) {
-        currentText = String.format(Locale.getDefault(), "Current: %.2f A", current);
-        textCurrent.setText(currentText);
-    }
+                // Compute min, max, average
+                float minValue = Float.MAX_VALUE;
+                float maxValue = Float.MIN_VALUE;
+                float sum = 0f;
+                for (Entry entry : entries) {
+                    float value = entry.getY();
+                    if (value < minValue) {
+                        minValue = value;
+                    }
+                    if (value > maxValue) {
+                        maxValue = value;
+                    }
+                    sum += value;
+                }
+                float avgValue = sum / entries.size();
 
-    /**
-     * Updates the text element with the latest temperature data.
-     *
-     * @param temperature Temperature to update text to.
-     */
-    private void updateTemperatureText(float temperature) {
-        temperatureText = String.format(Locale.getDefault(), "Temperature: %.2f°C", temperature);
-        textTemperature.setText(temperatureText);
-    }
-
-    /**
-     * Updates the text element with the latest RPM data.
-     *
-     * @param rpm RPM to update text to.
-     */
-    private void updateRPMText(float rpm) {
-        rpmText = String.format(Locale.getDefault(), "RPM: %.0f", rpm);
-        textRPM.setText(rpmText);
-    }
-
-    /**
-     * Updates the text element with the latest acceleration data.
-     *
-     * @param acceleration Acceleration to update text to.
-     */
-    private void updateAccelerationText(float acceleration) {
-        accelerationText = String.format(Locale.getDefault(), "Acceleration: %.2f m/s²", acceleration);
-        textAcceleration.setText(accelerationText);
+                // Update TextViews
+                latestTextView.setText(String.format(Locale.getDefault(), valueFormat + " %s", latestValue, unit));
+                minTextView.setText(String.format(Locale.getDefault(), "Min: " + valueFormat + " %s", minValue, unit));
+                maxTextView.setText(String.format(Locale.getDefault(), "Max: " + valueFormat + " %s", maxValue, unit));
+                avgTextView.setText(String.format(Locale.getDefault(), "Avg: " + valueFormat + " %s", avgValue, unit));
+            } else {
+                latestTextView.setText(R.string.n_a);
+                minTextView.setText(R.string.min_n_a);
+                maxTextView.setText(R.string.max_n_a);
+                avgTextView.setText(R.string.avg_n_a);
+            }
+        });
     }
 
     /**
@@ -455,25 +458,37 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
     }
 
     /**
-     * Clears all data in the ViewModel and resets local variables.
+     * Clears all data in the ViewModel and resets TextViews.
      */
     private void clearData() {
         // Clear data in ViewModel
         sharedViewModel.clearAllData();
 
-        // Reset local variables
-        voltageText = "Voltage: N/A";
-        currentText = "Current: N/A";
-        temperatureText = "Temperature: N/A";
-        rpmText = "RPM: N/A";
-        accelerationText = "Acceleration: N/A";
+        // Reset TextViews
+        textVoltage.setText(R.string.n_a);
+        textVoltageMin.setText(R.string.min_n_a);
+        textVoltageMax.setText(R.string.max_n_a);
+        textVoltageAvg.setText(R.string.avg_n_a);
 
-        // Update TextViews
-        textVoltage.setText(voltageText);
-        textCurrent.setText(currentText);
-        textTemperature.setText(temperatureText);
-        textRPM.setText(rpmText);
-        textAcceleration.setText(accelerationText);
+        textCurrent.setText(R.string.n_a);
+        textCurrentMin.setText(R.string.min_n_a);
+        textCurrentMax.setText(R.string.max_n_a);
+        textCurrentAvg.setText(R.string.avg_n_a);
+
+        textTemperature.setText(R.string.n_a);
+        textTemperatureMin.setText(R.string.min_n_a);
+        textTemperatureMax.setText(R.string.max_n_a);
+        textTemperatureAvg.setText(R.string.avg_n_a);
+
+        textRPM.setText(R.string.n_a);
+        textRPMMin.setText(R.string.min_n_a);
+        textRPMMax.setText(R.string.max_n_a);
+        textRPMAvg.setText(R.string.avg_n_a);
+
+        textAcceleration.setText(R.string.n_a);
+        textAccelerationMin.setText(R.string.min_n_a);
+        textAccelerationMax.setText(R.string.max_n_a);
+        textAccelerationAvg.setText(R.string.avg_n_a);
     }
 
     /**
@@ -529,16 +544,6 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
                     sharedViewModel.setRotationData(point.roll, point.pitch, point.yaw);
                 }
             });
-        }
-    }
-
-    /**
-     * Updates the toolbar navigation icon based on the back stack.
-     */
-    private void updateToolbarNavigationIcon() {
-        int backStackEntryCount = getSupportFragmentManager().getBackStackEntryCount();
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(backStackEntryCount > 0);
         }
     }
 

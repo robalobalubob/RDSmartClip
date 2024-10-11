@@ -139,18 +139,19 @@ public class ChartsFragment extends Fragment {
     }
 
     private void handleToolbar() {
-        boolean isFullscreen = getArguments() != null && getArguments().getBoolean("isFullscreen", false);
-
         AppCompatActivity activity = (AppCompatActivity) requireActivity();
         Toolbar toolbar = activity.findViewById(R.id.toolbar);
 
         if (activity.getSupportActionBar() != null) {
-            activity.getSupportActionBar().setTitle("Model View");
+            activity.getSupportActionBar().setTitle("Charts");
 
+            // Display the back arrow
             activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+            // Handle back arrow click
             toolbar.setNavigationOnClickListener(v -> {
-                // Navigate back when the back arrow is clicked
-                activity.getOnBackPressedDispatcher().onBackPressed();
+                // Navigate back to MainActivity
+                activity.getSupportFragmentManager().popBackStack();
             });
         }
     }
@@ -162,14 +163,11 @@ public class ChartsFragment extends Fragment {
         // Reset toolbar to default state
         AppCompatActivity activity = (AppCompatActivity) requireActivity();
         Toolbar toolbar = activity.findViewById(R.id.toolbar);
-        BottomNavigationView bottomNavigationView = activity.findViewById(R.id.bottom_navigation);
 
         if (activity.getSupportActionBar() != null) {
             activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             activity.getSupportActionBar().setTitle("SmartClip");
             toolbar.setNavigationOnClickListener(null);
         }
-
-        bottomNavigationView.setVisibility(View.VISIBLE);
     }
 }

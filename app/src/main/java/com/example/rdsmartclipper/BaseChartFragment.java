@@ -5,8 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import android.graphics.Color;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,7 +19,6 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.List;
 
@@ -97,6 +94,19 @@ public abstract class BaseChartFragment extends Fragment {
         chart.getAxisRight().setEnabled(false); // Disable right Y-axis
         chart.getLegend().setEnabled(false);    // Disable legend
 
+        // Enable touch interactions
+        chart.setTouchEnabled(true);
+        chart.setHighlightPerTapEnabled(true);
+        chart.setHighlightPerDragEnabled(true);
+        chart.setDragEnabled(true);
+        chart.setScaleEnabled(true);
+        chart.setPinchZoom(true);
+
+        // Set the custom MarkerView
+        CustomMarkerView markerView = new CustomMarkerView(getContext());
+        markerView.setChartView(chart);
+        chart.setMarker(markerView);
+
         // Additional customization
         customizeChartAppearance();
     }
@@ -144,24 +154,20 @@ public abstract class BaseChartFragment extends Fragment {
     }
 
     private void handleToolbar() {
-        boolean isFullscreen = getArguments() != null && getArguments().getBoolean("isFullscreen", false);
-
         AppCompatActivity activity = (AppCompatActivity) requireActivity();
         Toolbar toolbar = activity.findViewById(R.id.toolbar);
-        BottomNavigationView bottomNavigationView = activity.findViewById(R.id.bottom_navigation);
 
         if (activity.getSupportActionBar() != null) {
             activity.getSupportActionBar().setTitle(getChartLabel());
 
-            if (isFullscreen) {
-                activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                toolbar.setNavigationOnClickListener(v -> activity.getOnBackPressedDispatcher().onBackPressed());
-                bottomNavigationView.setVisibility(View.GONE);
-            } else {
-                activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-                toolbar.setNavigationOnClickListener(null);
-                bottomNavigationView.setVisibility(View.VISIBLE);
-            }
+            // Display the back arrow
+            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+            // Handle back arrow click
+            toolbar.setNavigationOnClickListener(v -> {
+                // Navigate back to ChartsFragment
+                activity.getSupportFragmentManager().popBackStack();
+            });
         }
     }
 
@@ -169,16 +175,14 @@ public abstract class BaseChartFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
 
-        // Reset toolbar
+        // Reset toolbar to default state
         AppCompatActivity activity = (AppCompatActivity) requireActivity();
         Toolbar toolbar = activity.findViewById(R.id.toolbar);
-        BottomNavigationView bottomNavigationView = activity.findViewById(R.id.bottom_navigation);
 
         if (activity.getSupportActionBar() != null) {
             activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             activity.getSupportActionBar().setTitle("SmartClip");
             toolbar.setNavigationOnClickListener(null);
         }
-        bottomNavigationView.setVisibility(View.VISIBLE);
     }
 }

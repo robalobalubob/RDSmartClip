@@ -29,4 +29,17 @@
     <string name="set_rpm_y_limits">Set RPM Y-Limits</string>
     <string name="open_temperature_chart">Open Temperature Chart</string>
     <string name="set_temperature_y_limits">Set Temperature Y-Limits</string>
+    <string name="average">Average</string>
+    <string name="parameter">Parameter</string>
+    <string name="current">Current</string>
+    <string name="min">Min</string>
+    <string name="max">Max</string>
+    <string name="voltage">Voltage</string>
+    <string name="temperature">Temperature</string>
+    <string name="rpm">RPM</string>
+    <string name="acceleration">Acceleration</string>
+    <string name="n_a">N/A</string>
+    <string name="min_n_a">Min: N/A</string>
+    <string name="max_n_a">Max: N/A</string>
+    <string name="avg_n_a">Avg: N/A</string>
 </resources>

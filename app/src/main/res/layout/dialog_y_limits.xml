@@ -11,16 +11,16 @@
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:autofillHints=""
-        android:hint="@string/upper_limit"
-        android:inputType="numberDecimal" />
+        android:hint="@string/lower_limit"
+        android:inputType="numberSigned" />
 
     <EditText
         android:id="@+id/input_upper_limit"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:autofillHints=""
-        android:hint="@string/lower_limit"
-        android:inputType="numberDecimal"
+        android:hint="@string/upper_limit"
+        android:inputType="numberSigned"
         android:layout_marginTop="16dp" />
 
 </LinearLayout>
