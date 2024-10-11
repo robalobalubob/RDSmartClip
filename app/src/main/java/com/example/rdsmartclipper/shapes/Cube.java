@@ -9,6 +9,11 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
+/**
+ * Cube shape, now that Model exists this is not needed anymore
+ * Being kept around for testing purposes
+ * IDEA: Set the cube to be used during debug mode
+ */
 public class Cube {
 
     // Number of coordinates per vertex in this array
@@ -56,8 +61,9 @@ public class Cube {
     };
     private final int mProgram;
 
-    private final int vertexCount = cubeCoords.length / COORDS_PER_VERTEX;
-
+    /**
+     * Cube Constructor
+     */
     public Cube() {
         // Initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(cubeCoords.length * 4);
@@ -111,12 +117,15 @@ public class Cube {
         GLES20.glLinkProgram(mProgram);
     }
 
+    /**
+     * Draws the cube to screen together with MyGLRenderer
+     * @param mvpMatrix model-view-projection matrix
+     */
     public void draw(float[] mvpMatrix) {
         // Use the program
         GLES20.glUseProgram(mProgram);
 
         // Get handles
-        // Handles
         int positionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
         int colorHandle = GLES20.glGetAttribLocation(mProgram, "aColor");
         int mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");

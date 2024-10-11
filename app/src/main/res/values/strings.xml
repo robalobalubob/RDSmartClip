@@ -17,6 +17,16 @@
     <string name="charts">Charts</string>
     <string name="combined_chart">Combined Chart</string>
     <string name="_3d_model">3D Model</string>
-    <string name="lower_limit">Lower Limit</string>
-    <string name="upper_limit">Upper Limit</string>
+    <string name="lower_limit">Lower Y-Limit</string>
+    <string name="upper_limit">Upper Y-Limit</string>
+    <string name="open_voltage_chart">Open Voltage Chart</string>
+    <string name="set_voltage_y_limits">Set Voltage Y-Limits</string>
+    <string name="open_current_chart">Open Current Chart</string>
+    <string name="set_current_y_limits">Set Current Y-Limits</string>
+    <string name="open_acceleration_chart">Open Acceleration Chart</string>
+    <string name="set_acceleration_y_limits">Set Acceleration Y-Limits</string>
+    <string name="open_rpm_chart">Open RPM Chart</string>
+    <string name="set_rpm_y_limits">Set RPM Y-Limits</string>
+    <string name="open_temperature_chart">Open Temperature Chart</string>
+    <string name="set_temperature_y_limits">Set Temperature Y-Limits</string>
 </resources>

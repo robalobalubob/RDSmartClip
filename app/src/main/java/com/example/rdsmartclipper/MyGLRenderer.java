@@ -7,8 +7,11 @@ import android.opengl.Matrix;
 
 import com.example.rdsmartclipper.shapes.Cube;
 
+import com.example.rdsmartclipper.shapes.Model;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+
 
 public class MyGLRenderer implements GLSurfaceView.Renderer {
 
@@ -17,16 +20,32 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
     private final float[] mModelMatrix = new float[16];
+
     // Rotation angles (volatile for thread safety)
     public volatile float angleX;
     public volatile float angleY;
     public volatile float angleZ;
-    private Cube cube;
 
+    //Shapes to render
+    private Cube cube;
+    private Model model;
+
+    private final Context context;
+
+    /**
+     * Constructor for MyGLRender
+     * @param context The context the renderer is in
+     */
     public MyGLRenderer(Context context) {
+        this.context = context;
     }
 
-    // Utility method for compiling a shader
+    /**
+     * Utility method for loading shaders
+     * @param type Type of shader
+     * @param shaderCode Code of shader
+     * @return The shader as a int
+     */
     public static int loadShader(int type, String shaderCode) {
         // Create a shader
         int shader = GLES20.glCreateShader(type);
@@ -38,15 +57,27 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         return shader;
     }
 
+    /**
+     * Called when surface created
+     * @param unused the GL interface. Use <code>instanceof</code> to
+     * test if the interface supports GL11 or higher interfaces.
+     * @param config the EGLConfig of the created surface. Can be used
+     * to create matching pbuffers.
+     */
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
         // Set the background frame color
-        GLES20.glClearColor(0f, 0f, 0f, 1f);
+        GLES20.glClearColor(0f, 0f, 0f, 1f); // Black
 
-        // Initialize a cube
-        cube = new Cube();
+        // Initialize the model
+        model = new Model(context, "assembly.obj");
     }
 
+    /**
+     * Called when frame is drawn, draws the model
+     * @param unused the GL interface. Use <code>instanceof</code> to
+     * test if the interface supports GL11 or higher interfaces.
+     */
     @Override
     public void onDrawFrame(GL10 unused) {
         // Redraw background color
@@ -75,15 +106,26 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         float[] scratch = new float[16];
         Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mModelMatrix, 0);
 
-        // Draw the cube
-        cube.draw(scratch);
+        // Set scale
+        model.setScale(0.4f);
+
+        // Draw model
+        model.draw(scratch);
     }
 
+    /**
+     * Called when surface changes, also determines the aspect ratio
+     * @param unused the GL interface. Use <code>instanceof</code> to
+     * test if the interface supports GL11 or higher interfaces.
+     * @param width Width of the window
+     * @param height Height of the window
+     */
     @Override
     public void onSurfaceChanged(GL10 unused, int width, int height) {
         // Adjust the viewport based on geometry changes
         GLES20.glViewport(0, 0, width, height);
 
+        // Aspect Ratio
         float ratio = (float) width / height;
 
         // This projection matrix is applied to object coordinates in the onDrawFrame() method

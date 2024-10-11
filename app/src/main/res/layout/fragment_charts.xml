@@ -1,126 +1,133 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/charts_fragment_scroll_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:clipToPadding="false"
+    android:paddingTop="?attr/actionBarSize"
+    android:paddingBottom="?attr/actionBarSize">
 
-    <!-- Voltage Chart Row -->
     <LinearLayout
-        style="?android:attr/buttonBarStyle"
-        android:layout_width="wrap_content"
+        android:id="@+id/charts_fragment_linear_layout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:orientation="horizontal">
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Voltage Chart Section -->
+        <TextView
+            android:id="@+id/voltage_chart_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/voltage_chart"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingBottom="8dp" />
 
         <Button
             android:id="@+id/button_voltage_chart"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/voltage_chart" />
+            android:text="@string/open_voltage_chart" />
 
         <Button
             android:id="@+id/button_voltage_limit"
-            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/set_voltage_y_limits"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Current Chart Section -->
+        <TextView
+            android:id="@+id/current_chart_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/set_y_limit"
-            tools:ignore="DuplicateSpeakableTextCheck" />
-    </LinearLayout>
-
-    <!-- Repeat for other charts -->
-    <!-- Current Chart Row -->
-    <LinearLayout
-        style="?android:attr/buttonBarStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:orientation="horizontal">
+            android:text="@string/current_chart"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingBottom="8dp" />
 
         <Button
             android:id="@+id/button_current_chart"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/current_chart" />
+            android:text="@string/open_current_chart" />
 
         <Button
             android:id="@+id/button_current_limit"
-            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/set_current_y_limits"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Acceleration Chart Section -->
+        <TextView
+            android:id="@+id/acceleration_chart_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/set_y_limit" />
-    </LinearLayout>
-
-    <!-- Acceleration Chart Row -->
-    <LinearLayout
-        style="?android:attr/buttonBarStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:orientation="horizontal">
+            android:text="@string/acceleration_chart"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingBottom="8dp" />
 
         <Button
             android:id="@+id/button_acceleration_chart"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/acceleration_chart" />
+            android:text="@string/open_acceleration_chart" />
 
         <Button
             android:id="@+id/button_acceleration_limit"
-            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/set_acceleration_y_limits"
+            android:layout_marginBottom="16dp" />
+
+        <!-- RPM Chart Section -->
+        <TextView
+            android:id="@+id/rpm_chart_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/set_y_limit" />
-    </LinearLayout>
-
-    <!-- RPM Chart Row -->
-    <LinearLayout
-        style="?android:attr/buttonBarStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:orientation="horizontal">
+            android:text="@string/rpm_chart"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingBottom="8dp" />
 
         <Button
             android:id="@+id/button_rpm_chart"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/rpm_chart" />
+            android:text="@string/open_rpm_chart" />
 
         <Button
             android:id="@+id/button_rpm_limit"
-            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/set_rpm_y_limits"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Temperature Chart Section -->
+        <TextView
+            android:id="@+id/temperature_chart_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/set_y_limit" />
-    </LinearLayout>
-
-    <LinearLayout
-        style="?android:attr/buttonBarStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:orientation="horizontal">
+            android:text="@string/temperature_chart"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingBottom="8dp" />
 
         <Button
             android:id="@+id/button_temperature_chart"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/temperature_chart" />
+            android:text="@string/open_temperature_chart" />
 
         <Button
             android:id="@+id/button_temperature_limit"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/set_y_limit" />
-    </LinearLayout>
+            android:text="@string/set_temperature_y_limits"
+            android:layout_marginBottom="16dp" />
 
-</LinearLayout>
+    </LinearLayout>
+</ScrollView>
