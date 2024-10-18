@@ -209,6 +209,10 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
                 binding.mainContent.setVisibility(View.VISIBLE);
                 // Hide any fragments
                 getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                if (getSupportActionBar() != null) {
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                    getSupportActionBar().setTitle("SmartClip");
+                }
                 return true;
             } else if (itemId == R.id.navigation_charts) {
                 // Open ChartsFragment
@@ -267,6 +271,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothService.
             List<String> deviceList = bluetoothService.getPairedDevices();
             if (deviceList.isEmpty()) {
                 Toast.makeText(this, "No paired Bluetooth devices found.", Toast.LENGTH_SHORT).show();
+                bluetoothService.startDiscovery();
                 return;
             }
 

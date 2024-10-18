@@ -146,7 +146,7 @@ public class ChartsFragment extends Fragment {
             activity.getSupportActionBar().setTitle("Charts");
 
             // Display the back arrow
-            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
             // Handle back arrow click
             toolbar.setNavigationOnClickListener(v -> {
@@ -161,13 +161,13 @@ public class ChartsFragment extends Fragment {
         super.onDestroyView();
 
         // Reset toolbar to default state
-        AppCompatActivity activity = (AppCompatActivity) requireActivity();
-        Toolbar toolbar = activity.findViewById(R.id.toolbar);
-
-        if (activity.getSupportActionBar() != null) {
-            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-            activity.getSupportActionBar().setTitle("SmartClip");
-            toolbar.setNavigationOnClickListener(null);
-        }
+//        AppCompatActivity activity = (AppCompatActivity) requireActivity();
+//        Toolbar toolbar = activity.findViewById(R.id.toolbar);
+//
+//        if (activity.getSupportActionBar() != null) {
+//            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+//            activity.getSupportActionBar().setTitle("SmartClip");
+//            toolbar.setNavigationOnClickListener(null);
+//        }
     }
 }

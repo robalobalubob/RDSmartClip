@@ -38,9 +38,6 @@ public class Model {
     // OpenGL handles
     private int mProgram;
 
-    // Scaling factor
-    private float scale = 1.0f;
-
     // Texture ID
     private int textureId;
 
@@ -112,7 +109,7 @@ public class Model {
 
         // Material handling
         Map<String, Material> materialMap = new HashMap<>();
-        String currentMaterialName = null;
+        String currentMaterialName;
         Material currentMaterial = null;
 
         try {
@@ -127,7 +124,7 @@ public class Model {
                     // Material library
                     String mtlFileName = line.substring(7).trim();
                     Log.d(TAG, "Loading mtllib: " + mtlFileName);
-                    loadMTL(context, mtlFileName, materialMap);
+                    loadMTL(context, mtlFileName+".mtl", materialMap);
                 } else if (line.startsWith("usemtl ")) {
                     // Use material
                     currentMaterialName = line.substring(7).trim();
@@ -232,9 +229,11 @@ public class Model {
 
             // Load texture if available
             if (currentMaterial != null && currentMaterial.textureFileName != null) {
+                Log.d(TAG, "Loading texture: " + currentMaterial.textureFileName);
                 loadTexture(context, currentMaterial.textureFileName);
             } else {
                 // Load a default white texture
+                Log.d(TAG, "No texture found, loading default texture");
                 loadDefaultTexture();
             }
 
@@ -261,11 +260,13 @@ public class Model {
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
                 if (line.startsWith("newmtl ")) {
+                    // Start a new material
                     String materialName = line.substring(7).trim();
                     currentMaterial = new Material(materialName);
                     materialMap.put(materialName, currentMaterial);
                 } else if (currentMaterial != null) {
                     if (line.startsWith("Kd ")) {
+                        // Diffuse color
                         String[] tokens = line.split("\\s+");
                         if (tokens.length >= 4) {
                             float r = Float.parseFloat(tokens[1]);
@@ -273,11 +274,52 @@ public class Model {
                             float b = Float.parseFloat(tokens[3]);
                             currentMaterial.diffuseColor = new float[]{r, g, b};
                         }
+                    } else if (line.startsWith("Ka ")) {
+                        // Ambient color
+                        String[] tokens = line.split("\\s+");
+                        if (tokens.length >= 4) {
+                            float r = Float.parseFloat(tokens[1]);
+                            float g = Float.parseFloat(tokens[2]);
+                            float b = Float.parseFloat(tokens[3]);
+                            currentMaterial.ambientColor = new float[]{r, g, b};
+                        }
+                    } else if (line.startsWith("Ks ")) {
+                        // Specular color
+                        String[] tokens = line.split("\\s+");
+                        if (tokens.length >= 4) {
+                            float r = Float.parseFloat(tokens[1]);
+                            float g = Float.parseFloat(tokens[2]);
+                            float b = Float.parseFloat(tokens[3]);
+                            currentMaterial.specularColor = new float[]{r, g, b};
+                        }
+                    } else if (line.startsWith("Ns ")) {
+                        // Specular exponent (shininess)
+                        String[] tokens = line.split("\\s+");
+                        if (tokens.length >= 2) {
+                            currentMaterial.shininess = Float.parseFloat(tokens[1]);
+                        }
+                    } else if (line.startsWith("Tr ") || line.startsWith("d ")) {
+                        // Transparency (Tr or d - inverse of transparency)
+                        String[] tokens = line.split("\\s+");
+                        if (tokens.length >= 2) {
+                            float transparency = Float.parseFloat(tokens[1]);
+                            // OpenGL uses `d` for transparency and `Tr` for transparency, but they're inverses
+                            if (line.startsWith("Tr ")) {
+                                transparency = 1.0f - transparency; // Inverse of Tr
+                            }
+                            currentMaterial.transparency = transparency;
+                        }
+                    } else if (line.startsWith("illum ")) {
+                        // Illumination model
+                        String[] tokens = line.split("\\s+");
+                        if (tokens.length >= 2) {
+                            currentMaterial.illuminationModel = Integer.parseInt(tokens[1]);
+                        }
                     } else if (line.startsWith("map_Kd ")) {
-                        String textureFileName = line.substring(7).trim();
-                        currentMaterial.textureFileName = textureFileName;
+                        // Diffuse texture map
+                        currentMaterial.textureFileName = line.substring(7).trim();
                     }
-                    // Handle other material properties as needed
+                    // Add other material properties here if needed
                 }
             }
             reader.close();
@@ -384,6 +426,8 @@ public class Model {
         float[] scaledMVPMatrix = new float[16];
         float[] scalingMatrix = new float[16];
         Matrix.setIdentityM(scalingMatrix, 0);
+        // Scaling factor
+        float scale = 1.0f;
         Matrix.scaleM(scalingMatrix, 0, scale, scale, scale);
         Matrix.multiplyMM(scaledMVPMatrix, 0, mvpMatrix, 0, scalingMatrix, 0);
 
@@ -465,21 +509,6 @@ public class Model {
         bitmap.recycle();
     }
 
-    /**
-     * Sets the scale for the model.
-     *
-     * @param scale Float to scale by
-     */
-    public void setScale(float scale) {
-        this.scale = scale;
-    }
-
-    // Check if model is in view frustum (for frustum culling)
-    public boolean isInViewFrustum(float[] mvpMatrix) {
-        // Implement frustum culling logic here if desired
-        return true;
-    }
-
     // Utility methods
 
     private float[] toFloatArray(List<Float> list) {
@@ -558,10 +587,15 @@ public class Model {
      */
     private static class Material {
         String name;
-        float[] diffuseColor = {1.0f, 1.0f, 1.0f};
+        float[] diffuseColor = {1.0f, 1.0f, 1.0f}; // Default white diffuse
+        float[] ambientColor = {1.0f, 1.0f, 1.0f}; // Default white ambient
+        float[] specularColor = {1.0f, 1.0f, 1.0f}; // Default white specular
+        float shininess = 32.0f; // Default shininess
+        float transparency = 1.0f; // Default fully opaque
+        int illuminationModel = 2; // Default Phong shading
         String textureFileName;
 
-        Material(String name) {
+        public Material(String name) {
             this.name = name;
         }
     }

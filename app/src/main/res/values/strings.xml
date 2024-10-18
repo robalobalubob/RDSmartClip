@@ -42,4 +42,9 @@
     <string name="min_n_a">Min: N/A</string>
     <string name="max_n_a">Max: N/A</string>
     <string name="avg_n_a">Avg: N/A</string>
+
+    <string-array name="model_types">
+        <item>MC Assembly</item>
+        <item>Cube</item>
+    </string-array>
 </resources>

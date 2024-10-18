@@ -139,7 +139,7 @@ public class CombinedChartFragment extends Fragment {
             activity.getSupportActionBar().setTitle("Combined Chart");
 
             // Display the back arrow
-            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
             // Handle back arrow click
             toolbar.setNavigationOnClickListener(v -> {
@@ -153,14 +153,14 @@ public class CombinedChartFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
 
-        // Reset toolbar to default state
-        AppCompatActivity activity = (AppCompatActivity) requireActivity();
-        Toolbar toolbar = activity.findViewById(R.id.toolbar);
-
-        if (activity.getSupportActionBar() != null) {
-            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-            activity.getSupportActionBar().setTitle("SmartClip");
-            toolbar.setNavigationOnClickListener(null);
-        }
+//        // Reset toolbar to default state
+//        AppCompatActivity activity = (AppCompatActivity) requireActivity();
+//        Toolbar toolbar = activity.findViewById(R.id.toolbar);
+//
+//        if (activity.getSupportActionBar() != null) {
+//            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+//            activity.getSupportActionBar().setTitle("SmartClip");
+//            toolbar.setNavigationOnClickListener(null);
+//        }
     }
 }

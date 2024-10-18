@@ -19,6 +19,7 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.List;
 
@@ -161,7 +162,7 @@ public abstract class BaseChartFragment extends Fragment {
             activity.getSupportActionBar().setTitle(getChartLabel());
 
             // Display the back arrow
-            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
             // Handle back arrow click
             toolbar.setNavigationOnClickListener(v -> {
@@ -176,13 +177,13 @@ public abstract class BaseChartFragment extends Fragment {
         super.onDestroyView();
 
         // Reset toolbar to default state
-        AppCompatActivity activity = (AppCompatActivity) requireActivity();
-        Toolbar toolbar = activity.findViewById(R.id.toolbar);
-
-        if (activity.getSupportActionBar() != null) {
-            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-            activity.getSupportActionBar().setTitle("SmartClip");
-            toolbar.setNavigationOnClickListener(null);
-        }
+//        AppCompatActivity activity = (AppCompatActivity) requireActivity();
+//        Toolbar toolbar = activity.findViewById(R.id.toolbar);
+//
+//        if (activity.getSupportActionBar() != null) {
+//            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+//            activity.getSupportActionBar().setTitle("SmartClip");
+//            toolbar.setNavigationOnClickListener(null);
+//        }
     }
 }

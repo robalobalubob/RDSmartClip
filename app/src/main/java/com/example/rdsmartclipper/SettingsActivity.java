@@ -6,6 +6,8 @@ import android.view.MenuItem;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceFragmentCompat;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 import java.util.Objects;
 
 /**
@@ -34,6 +36,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
         // Set the toolbar as the action bar
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("Settings");
     }
 
     /**

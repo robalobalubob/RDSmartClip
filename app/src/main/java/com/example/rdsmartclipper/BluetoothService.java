@@ -146,6 +146,15 @@ public class BluetoothService extends Service {
         executorService.shutdown();
     }
 
+    public void startDiscovery() {
+        if (bluetoothAdapter != null) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            bluetoothAdapter.startDiscovery();
+        }
+    }
+
     public interface BluetoothDataCallback {
         void onBluetoothDataReceived(String data);
     }

@@ -7,7 +7,7 @@
     android:clipToPadding="false"
     android:paddingTop="?attr/actionBarSize"
     android:paddingBottom="?attr/actionBarSize">
-
+ <!-- change to row / column layout -->
     <LinearLayout
         android:id="@+id/combined_chart_linear_layout"
         android:layout_width="match_parent"
